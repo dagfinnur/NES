@@ -1,8 +1,8 @@
-# Install script for directory: /home/jesper/zephyrproject/zephyr/modules/cmsis
+# Install script for directory: C:/Users/dagfi/Documents/School/NES/proj/zephyrproject/zephyr/modules/cmsis
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
-  set(CMAKE_INSTALL_PREFIX "/usr/local")
+  set(CMAKE_INSTALL_PREFIX "C:/Program Files (x86)/Zephyr-Kernel")
 endif()
 string(REGEX REPLACE "/$" "" CMAKE_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}")
 
@@ -34,12 +34,12 @@ endif()
 
 # Set default install directory permissions.
 if(NOT DEFINED CMAKE_OBJDUMP)
-  set(CMAKE_OBJDUMP "/home/jesper/zephyr-sdk-0.16.1/xtensa-espressif_esp32_zephyr-elf/bin/xtensa-espressif_esp32_zephyr-elf-objdump")
+  set(CMAKE_OBJDUMP "C:/Users/dagfi/Documents/School/NES/proj/zephyr-sdk-0.16.3/xtensa-espressif_esp32_zephyr-elf/bin/xtensa-espressif_esp32_zephyr-elf-objdump.exe")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for each subdirectory.
-  include("/home/jesper/zephyrproject/NES/app/build/modules/cmsis/cmsis/cmake_install.cmake")
+  include("C:/Users/dagfi/Documents/School/NES/proj/zephyrproject/NES/app/build/modules/cmsis/cmsis/cmake_install.cmake")
 
 endif()
 

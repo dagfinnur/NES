@@ -2,34 +2,34 @@
 	"sources" : 
 	[
 		{
-			"file" : "/home/jesper/zephyrproject/NES/app/build/zephyr/soc/soc/xtensa/espressif_esp32/esp32/CMakeFiles/EspPartitionTable"
+			"file" : "C:/Users/dagfi/Documents/School/NES/proj/zephyrproject/NES/app/build/zephyr/soc/soc/xtensa/espressif_esp32/esp32/CMakeFiles/EspPartitionTable"
 		},
 		{
-			"file" : "/home/jesper/zephyrproject/NES/app/build/zephyr/soc/soc/xtensa/espressif_esp32/esp32/CMakeFiles/EspPartitionTable.rule"
+			"file" : "C:/Users/dagfi/Documents/School/NES/proj/zephyrproject/NES/app/build/zephyr/soc/soc/xtensa/espressif_esp32/esp32/CMakeFiles/EspPartitionTable.rule"
 		},
 		{
-			"file" : "/home/jesper/zephyrproject/NES/app/build/zephyr/soc/soc/xtensa/espressif_esp32/esp32/CMakeFiles/EspPartitionTable-complete.rule"
+			"file" : "C:/Users/dagfi/Documents/School/NES/proj/zephyrproject/NES/app/build/zephyr/soc/soc/xtensa/espressif_esp32/esp32/CMakeFiles/EspPartitionTable-complete.rule"
 		},
 		{
-			"file" : "/home/jesper/zephyrproject/NES/app/build/zephyr/soc/soc/xtensa/espressif_esp32/esp32/EspPartitionTable-prefix/src/EspPartitionTable-stamp/EspPartitionTable-build.rule"
+			"file" : "C:/Users/dagfi/Documents/School/NES/proj/zephyrproject/NES/app/build/zephyr/soc/soc/xtensa/espressif_esp32/esp32/EspPartitionTable-prefix/src/EspPartitionTable-stamp/EspPartitionTable-build.rule"
 		},
 		{
-			"file" : "/home/jesper/zephyrproject/NES/app/build/zephyr/soc/soc/xtensa/espressif_esp32/esp32/EspPartitionTable-prefix/src/EspPartitionTable-stamp/EspPartitionTable-configure.rule"
+			"file" : "C:/Users/dagfi/Documents/School/NES/proj/zephyrproject/NES/app/build/zephyr/soc/soc/xtensa/espressif_esp32/esp32/EspPartitionTable-prefix/src/EspPartitionTable-stamp/EspPartitionTable-configure.rule"
 		},
 		{
-			"file" : "/home/jesper/zephyrproject/NES/app/build/zephyr/soc/soc/xtensa/espressif_esp32/esp32/EspPartitionTable-prefix/src/EspPartitionTable-stamp/EspPartitionTable-download.rule"
+			"file" : "C:/Users/dagfi/Documents/School/NES/proj/zephyrproject/NES/app/build/zephyr/soc/soc/xtensa/espressif_esp32/esp32/EspPartitionTable-prefix/src/EspPartitionTable-stamp/EspPartitionTable-download.rule"
 		},
 		{
-			"file" : "/home/jesper/zephyrproject/NES/app/build/zephyr/soc/soc/xtensa/espressif_esp32/esp32/EspPartitionTable-prefix/src/EspPartitionTable-stamp/EspPartitionTable-install.rule"
+			"file" : "C:/Users/dagfi/Documents/School/NES/proj/zephyrproject/NES/app/build/zephyr/soc/soc/xtensa/espressif_esp32/esp32/EspPartitionTable-prefix/src/EspPartitionTable-stamp/EspPartitionTable-install.rule"
 		},
 		{
-			"file" : "/home/jesper/zephyrproject/NES/app/build/zephyr/soc/soc/xtensa/espressif_esp32/esp32/EspPartitionTable-prefix/src/EspPartitionTable-stamp/EspPartitionTable-mkdir.rule"
+			"file" : "C:/Users/dagfi/Documents/School/NES/proj/zephyrproject/NES/app/build/zephyr/soc/soc/xtensa/espressif_esp32/esp32/EspPartitionTable-prefix/src/EspPartitionTable-stamp/EspPartitionTable-mkdir.rule"
 		},
 		{
-			"file" : "/home/jesper/zephyrproject/NES/app/build/zephyr/soc/soc/xtensa/espressif_esp32/esp32/EspPartitionTable-prefix/src/EspPartitionTable-stamp/EspPartitionTable-patch.rule"
+			"file" : "C:/Users/dagfi/Documents/School/NES/proj/zephyrproject/NES/app/build/zephyr/soc/soc/xtensa/espressif_esp32/esp32/EspPartitionTable-prefix/src/EspPartitionTable-stamp/EspPartitionTable-patch.rule"
 		},
 		{
-			"file" : "/home/jesper/zephyrproject/NES/app/build/zephyr/soc/soc/xtensa/espressif_esp32/esp32/EspPartitionTable-prefix/src/EspPartitionTable-stamp/EspPartitionTable-update.rule"
+			"file" : "C:/Users/dagfi/Documents/School/NES/proj/zephyrproject/NES/app/build/zephyr/soc/soc/xtensa/espressif_esp32/esp32/EspPartitionTable-prefix/src/EspPartitionTable-stamp/EspPartitionTable-update.rule"
 		}
 	],
 	"target" : 

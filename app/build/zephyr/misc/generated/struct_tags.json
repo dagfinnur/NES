@@ -61,6 +61,7 @@
         "can_transceiver_driver_api",
         "uart_mux_driver_api",
         "its_driver_api",
+        "tgpio_driver_api",
         "pcie_ctrl_driver_api",
         "svc_driver_api",
         "bc12_emul_driver_api",

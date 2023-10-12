@@ -2,34 +2,34 @@
 	"sources" : 
 	[
 		{
-			"file" : "/home/jesper/zephyrproject/NES/app/build/zephyr/soc/soc/xtensa/espressif_esp32/esp32/CMakeFiles/EspIdfBootloader"
+			"file" : "C:/Users/dagfi/Documents/School/NES/proj/zephyrproject/NES/app/build/zephyr/soc/soc/xtensa/espressif_esp32/esp32/CMakeFiles/EspIdfBootloader"
 		},
 		{
-			"file" : "/home/jesper/zephyrproject/NES/app/build/zephyr/soc/soc/xtensa/espressif_esp32/esp32/CMakeFiles/EspIdfBootloader.rule"
+			"file" : "C:/Users/dagfi/Documents/School/NES/proj/zephyrproject/NES/app/build/zephyr/soc/soc/xtensa/espressif_esp32/esp32/CMakeFiles/EspIdfBootloader.rule"
 		},
 		{
-			"file" : "/home/jesper/zephyrproject/NES/app/build/zephyr/soc/soc/xtensa/espressif_esp32/esp32/CMakeFiles/EspIdfBootloader-complete.rule"
+			"file" : "C:/Users/dagfi/Documents/School/NES/proj/zephyrproject/NES/app/build/zephyr/soc/soc/xtensa/espressif_esp32/esp32/CMakeFiles/EspIdfBootloader-complete.rule"
 		},
 		{
-			"file" : "/home/jesper/zephyrproject/NES/app/build/esp-idf/src/EspIdfBootloader-stamp/EspIdfBootloader-build.rule"
+			"file" : "C:/Users/dagfi/Documents/School/NES/proj/zephyrproject/NES/app/build/esp-idf/src/EspIdfBootloader-stamp/EspIdfBootloader-build.rule"
 		},
 		{
-			"file" : "/home/jesper/zephyrproject/NES/app/build/esp-idf/src/EspIdfBootloader-stamp/EspIdfBootloader-configure.rule"
+			"file" : "C:/Users/dagfi/Documents/School/NES/proj/zephyrproject/NES/app/build/esp-idf/src/EspIdfBootloader-stamp/EspIdfBootloader-configure.rule"
 		},
 		{
-			"file" : "/home/jesper/zephyrproject/NES/app/build/esp-idf/src/EspIdfBootloader-stamp/EspIdfBootloader-download.rule"
+			"file" : "C:/Users/dagfi/Documents/School/NES/proj/zephyrproject/NES/app/build/esp-idf/src/EspIdfBootloader-stamp/EspIdfBootloader-download.rule"
 		},
 		{
-			"file" : "/home/jesper/zephyrproject/NES/app/build/esp-idf/src/EspIdfBootloader-stamp/EspIdfBootloader-install.rule"
+			"file" : "C:/Users/dagfi/Documents/School/NES/proj/zephyrproject/NES/app/build/esp-idf/src/EspIdfBootloader-stamp/EspIdfBootloader-install.rule"
 		},
 		{
-			"file" : "/home/jesper/zephyrproject/NES/app/build/esp-idf/src/EspIdfBootloader-stamp/EspIdfBootloader-mkdir.rule"
+			"file" : "C:/Users/dagfi/Documents/School/NES/proj/zephyrproject/NES/app/build/esp-idf/src/EspIdfBootloader-stamp/EspIdfBootloader-mkdir.rule"
 		},
 		{
-			"file" : "/home/jesper/zephyrproject/NES/app/build/esp-idf/src/EspIdfBootloader-stamp/EspIdfBootloader-patch.rule"
+			"file" : "C:/Users/dagfi/Documents/School/NES/proj/zephyrproject/NES/app/build/esp-idf/src/EspIdfBootloader-stamp/EspIdfBootloader-patch.rule"
 		},
 		{
-			"file" : "/home/jesper/zephyrproject/NES/app/build/esp-idf/src/EspIdfBootloader-stamp/EspIdfBootloader-update.rule"
+			"file" : "C:/Users/dagfi/Documents/School/NES/proj/zephyrproject/NES/app/build/esp-idf/src/EspIdfBootloader-stamp/EspIdfBootloader-update.rule"
 		}
 	],
 	"target" : 

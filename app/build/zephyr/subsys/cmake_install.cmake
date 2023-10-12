@@ -1,8 +1,8 @@
-# Install script for directory: /home/jesper/zephyrproject/zephyr/subsys
+# Install script for directory: C:/Users/dagfi/Documents/School/NES/proj/zephyrproject/zephyr/subsys
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
-  set(CMAKE_INSTALL_PREFIX "/usr/local")
+  set(CMAKE_INSTALL_PREFIX "C:/Program Files (x86)/Zephyr-Kernel")
 endif()
 string(REGEX REPLACE "/$" "" CMAKE_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}")
 
@@ -34,31 +34,31 @@ endif()
 
 # Set default install directory permissions.
 if(NOT DEFINED CMAKE_OBJDUMP)
-  set(CMAKE_OBJDUMP "/home/jesper/zephyr-sdk-0.16.1/xtensa-espressif_esp32_zephyr-elf/bin/xtensa-espressif_esp32_zephyr-elf-objdump")
+  set(CMAKE_OBJDUMP "C:/Users/dagfi/Documents/School/NES/proj/zephyr-sdk-0.16.3/xtensa-espressif_esp32_zephyr-elf/bin/xtensa-espressif_esp32_zephyr-elf-objdump.exe")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for each subdirectory.
-  include("/home/jesper/zephyrproject/NES/app/build/zephyr/subsys/canbus/cmake_install.cmake")
-  include("/home/jesper/zephyrproject/NES/app/build/zephyr/subsys/debug/cmake_install.cmake")
-  include("/home/jesper/zephyrproject/NES/app/build/zephyr/subsys/fb/cmake_install.cmake")
-  include("/home/jesper/zephyrproject/NES/app/build/zephyr/subsys/fs/cmake_install.cmake")
-  include("/home/jesper/zephyrproject/NES/app/build/zephyr/subsys/ipc/cmake_install.cmake")
-  include("/home/jesper/zephyrproject/NES/app/build/zephyr/subsys/logging/cmake_install.cmake")
-  include("/home/jesper/zephyrproject/NES/app/build/zephyr/subsys/mem_mgmt/cmake_install.cmake")
-  include("/home/jesper/zephyrproject/NES/app/build/zephyr/subsys/mgmt/cmake_install.cmake")
-  include("/home/jesper/zephyrproject/NES/app/build/zephyr/subsys/modbus/cmake_install.cmake")
-  include("/home/jesper/zephyrproject/NES/app/build/zephyr/subsys/pm/cmake_install.cmake")
-  include("/home/jesper/zephyrproject/NES/app/build/zephyr/subsys/portability/cmake_install.cmake")
-  include("/home/jesper/zephyrproject/NES/app/build/zephyr/subsys/random/cmake_install.cmake")
-  include("/home/jesper/zephyrproject/NES/app/build/zephyr/subsys/rtio/cmake_install.cmake")
-  include("/home/jesper/zephyrproject/NES/app/build/zephyr/subsys/sd/cmake_install.cmake")
-  include("/home/jesper/zephyrproject/NES/app/build/zephyr/subsys/stats/cmake_install.cmake")
-  include("/home/jesper/zephyrproject/NES/app/build/zephyr/subsys/storage/cmake_install.cmake")
-  include("/home/jesper/zephyrproject/NES/app/build/zephyr/subsys/task_wdt/cmake_install.cmake")
-  include("/home/jesper/zephyrproject/NES/app/build/zephyr/subsys/testsuite/cmake_install.cmake")
-  include("/home/jesper/zephyrproject/NES/app/build/zephyr/subsys/tracing/cmake_install.cmake")
-  include("/home/jesper/zephyrproject/NES/app/build/zephyr/subsys/usb/cmake_install.cmake")
+  include("C:/Users/dagfi/Documents/School/NES/proj/zephyrproject/NES/app/build/zephyr/subsys/canbus/cmake_install.cmake")
+  include("C:/Users/dagfi/Documents/School/NES/proj/zephyrproject/NES/app/build/zephyr/subsys/debug/cmake_install.cmake")
+  include("C:/Users/dagfi/Documents/School/NES/proj/zephyrproject/NES/app/build/zephyr/subsys/fb/cmake_install.cmake")
+  include("C:/Users/dagfi/Documents/School/NES/proj/zephyrproject/NES/app/build/zephyr/subsys/fs/cmake_install.cmake")
+  include("C:/Users/dagfi/Documents/School/NES/proj/zephyrproject/NES/app/build/zephyr/subsys/ipc/cmake_install.cmake")
+  include("C:/Users/dagfi/Documents/School/NES/proj/zephyrproject/NES/app/build/zephyr/subsys/logging/cmake_install.cmake")
+  include("C:/Users/dagfi/Documents/School/NES/proj/zephyrproject/NES/app/build/zephyr/subsys/mem_mgmt/cmake_install.cmake")
+  include("C:/Users/dagfi/Documents/School/NES/proj/zephyrproject/NES/app/build/zephyr/subsys/mgmt/cmake_install.cmake")
+  include("C:/Users/dagfi/Documents/School/NES/proj/zephyrproject/NES/app/build/zephyr/subsys/modbus/cmake_install.cmake")
+  include("C:/Users/dagfi/Documents/School/NES/proj/zephyrproject/NES/app/build/zephyr/subsys/pm/cmake_install.cmake")
+  include("C:/Users/dagfi/Documents/School/NES/proj/zephyrproject/NES/app/build/zephyr/subsys/portability/cmake_install.cmake")
+  include("C:/Users/dagfi/Documents/School/NES/proj/zephyrproject/NES/app/build/zephyr/subsys/random/cmake_install.cmake")
+  include("C:/Users/dagfi/Documents/School/NES/proj/zephyrproject/NES/app/build/zephyr/subsys/rtio/cmake_install.cmake")
+  include("C:/Users/dagfi/Documents/School/NES/proj/zephyrproject/NES/app/build/zephyr/subsys/sd/cmake_install.cmake")
+  include("C:/Users/dagfi/Documents/School/NES/proj/zephyrproject/NES/app/build/zephyr/subsys/stats/cmake_install.cmake")
+  include("C:/Users/dagfi/Documents/School/NES/proj/zephyrproject/NES/app/build/zephyr/subsys/storage/cmake_install.cmake")
+  include("C:/Users/dagfi/Documents/School/NES/proj/zephyrproject/NES/app/build/zephyr/subsys/task_wdt/cmake_install.cmake")
+  include("C:/Users/dagfi/Documents/School/NES/proj/zephyrproject/NES/app/build/zephyr/subsys/testsuite/cmake_install.cmake")
+  include("C:/Users/dagfi/Documents/School/NES/proj/zephyrproject/NES/app/build/zephyr/subsys/tracing/cmake_install.cmake")
+  include("C:/Users/dagfi/Documents/School/NES/proj/zephyrproject/NES/app/build/zephyr/subsys/usb/cmake_install.cmake")
 
 endif()
 

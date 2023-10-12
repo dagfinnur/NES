@@ -290,7 +290,6 @@
 			interrupts = < 0x2d >;
 			interrupt-parent = < &intc >;
 			clocks = < &rtc 0x16 >;
-			sjw = < 0x1 >;
 			sample-point = < 0x36b >;
 			status = "disabled";
 		};
@@ -403,15 +402,16 @@
 	};
 	mdio: mdio {
 		compatible = "espressif,esp32-mdio";
-		protocol = "clause 22";
 		clocks = < &rtc 0x17 >;
 		status = "disabled";
+		#address-cells = < 0x1 >;
+		#size-cells = < 0x0 >;
 		pinctrl-0 = < &mdio_default >;
 		pinctrl-names = "default";
-		phy: phy {
+		phy: ethernet-phy@1 {
 			compatible = "ethernet-phy";
 			status = "disabled";
-			address = < 0x1 >;
+			reg = < 0x1 >;
 			phandle = < 0xa >;
 		};
 	};

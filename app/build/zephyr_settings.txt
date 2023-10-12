@@ -6,9 +6,9 @@
 # and/or the west manifest file.
 #
 # See the Modules guide for more information.
-"DTS_ROOT":"/home/jesper/zephyrproject/modules/hal/atmel"
-"DTS_ROOT":"/home/jesper/zephyrproject/modules/hal/espressif"
-"DTS_ROOT":"/home/jesper/zephyrproject/modules/hal/gigadevice"
-"DTS_ROOT":"/home/jesper/zephyrproject/modules/hal/nuvoton"
-"DTS_ROOT":"/home/jesper/zephyrproject/modules/hal/nxp"
-"DTS_ROOT":"/home/jesper/zephyrproject/modules/hal/stm32"
+"DTS_ROOT":"C:/Users/dagfi/Documents/School/NES/proj/zephyrproject/modules/hal/atmel"
+"DTS_ROOT":"C:/Users/dagfi/Documents/School/NES/proj/zephyrproject/modules/hal/espressif"
+"DTS_ROOT":"C:/Users/dagfi/Documents/School/NES/proj/zephyrproject/modules/hal/gigadevice"
+"DTS_ROOT":"C:/Users/dagfi/Documents/School/NES/proj/zephyrproject/modules/hal/nuvoton"
+"DTS_ROOT":"C:/Users/dagfi/Documents/School/NES/proj/zephyrproject/modules/hal/nxp"
+"DTS_ROOT":"C:/Users/dagfi/Documents/School/NES/proj/zephyrproject/modules/hal/stm32"

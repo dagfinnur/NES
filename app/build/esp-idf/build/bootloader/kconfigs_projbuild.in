@@ -1,4 +1,4 @@
-source "/home/jesper/zephyrproject/modules/hal/espressif/components/bootloader/Kconfig.projbuild"
-source "/home/jesper/zephyrproject/modules/hal/espressif/components/esp_rom/Kconfig.projbuild"
-source "/home/jesper/zephyrproject/modules/hal/espressif/components/esptool_py/Kconfig.projbuild"
-source "/home/jesper/zephyrproject/modules/hal/espressif/components/partition_table/Kconfig.projbuild"
+source "C:/Users/dagfi/Documents/School/NES/proj/zephyrproject/modules/hal/espressif/components/bootloader/Kconfig.projbuild"
+source "C:/Users/dagfi/Documents/School/NES/proj/zephyrproject/modules/hal/espressif/components/esp_rom/Kconfig.projbuild"
+source "C:/Users/dagfi/Documents/School/NES/proj/zephyrproject/modules/hal/espressif/components/esptool_py/Kconfig.projbuild"
+source "C:/Users/dagfi/Documents/School/NES/proj/zephyrproject/modules/hal/espressif/components/partition_table/Kconfig.projbuild"

@@ -16,22 +16,19 @@ debug-runner: openocd
 
 # Common runner configuration values.
 config:
-  board_dir: /home/jesper/zephyrproject/zephyr/boards/xtensa/esp32_ethernet_kit
+  board_dir: C:/Users/dagfi/Documents/School/NES/proj/zephyrproject/zephyr/boards/xtensa/esp32_ethernet_kit
   # Build outputs:
   elf_file: zephyr.elf
   bin_file: zephyr.bin
   # Host tools:
-  gdb: /home/jesper/zephyr-sdk-0.16.1/xtensa-espressif_esp32_zephyr-elf/bin/xtensa-espressif_esp32_zephyr-elf-gdb
-  openocd: /home/jesper/zephyr-sdk-0.16.1/sysroots/x86_64-pokysdk-linux/usr/bin/openocd
-  openocd_search:
-    - /home/jesper/zephyr-sdk-0.16.1/sysroots/x86_64-pokysdk-linux/usr/share/openocd/scripts
+  gdb: C:/Users/dagfi/Documents/School/NES/proj/zephyr-sdk-0.16.3/xtensa-espressif_esp32_zephyr-elf/bin/xtensa-espressif_esp32_zephyr-elf-gdb.exe
 
 # Runner specific arguments
 args:
   esp32:
-    - --esp-idf-path=/home/jesper/zephyrproject/modules/hal/espressif
-    - --esp-flash-bootloader=/home/jesper/zephyrproject/NES/app/build/esp-idf/build/bootloader/bootloader.bin
-    - --esp-flash-partition_table=/home/jesper/zephyrproject/NES/app/build/esp-idf/build/partitions_singleapp.bin
+    - --esp-idf-path=C:/Users/dagfi/Documents/School/NES/proj/zephyrproject/modules/hal/espressif
+    - --esp-flash-bootloader=C:/Users/dagfi/Documents/School/NES/proj/zephyrproject/NES/app/build/esp-idf/build/bootloader/bootloader.bin
+    - --esp-flash-partition_table=C:/Users/dagfi/Documents/School/NES/proj/zephyrproject/NES/app/build/esp-idf/build/partitions_singleapp.bin
     - --esp-partition-table-address=0x8000
     - --esp-boot-address=0x1000
     - --esp-app-address=0x10000
@@ -53,37 +50,37 @@ args:
     - --gdb-init
     - thb main
   esp32:
-    - --esp-idf-path=/home/jesper/zephyrproject/modules/hal/espressif
-    - --esp-flash-bootloader=/home/jesper/zephyrproject/NES/app/build/esp-idf/build/bootloader/bootloader.bin
-    - --esp-flash-partition_table=/home/jesper/zephyrproject/NES/app/build/esp-idf/build/partitions_singleapp.bin
+    - --esp-idf-path=C:/Users/dagfi/Documents/School/NES/proj/zephyrproject/modules/hal/espressif
+    - --esp-flash-bootloader=C:/Users/dagfi/Documents/School/NES/proj/zephyrproject/NES/app/build/esp-idf/build/bootloader/bootloader.bin
+    - --esp-flash-partition_table=C:/Users/dagfi/Documents/School/NES/proj/zephyrproject/NES/app/build/esp-idf/build/partitions_singleapp.bin
     - --esp-partition-table-address=0x8000
     - --esp-boot-address=0x1000
     - --esp-app-address=0x10000
   esp32:
-    - --esp-idf-path=/home/jesper/zephyrproject/modules/hal/espressif
-    - --esp-flash-bootloader=/home/jesper/zephyrproject/NES/app/build/esp-idf/build/bootloader/bootloader.bin
-    - --esp-flash-partition_table=/home/jesper/zephyrproject/NES/app/build/esp-idf/build/partitions_singleapp.bin
+    - --esp-idf-path=C:/Users/dagfi/Documents/School/NES/proj/zephyrproject/modules/hal/espressif
+    - --esp-flash-bootloader=C:/Users/dagfi/Documents/School/NES/proj/zephyrproject/NES/app/build/esp-idf/build/bootloader/bootloader.bin
+    - --esp-flash-partition_table=C:/Users/dagfi/Documents/School/NES/proj/zephyrproject/NES/app/build/esp-idf/build/partitions_singleapp.bin
     - --esp-partition-table-address=0x8000
     - --esp-boot-address=0x1000
     - --esp-app-address=0x10000
   esp32:
-    - --esp-idf-path=/home/jesper/zephyrproject/modules/hal/espressif
-    - --esp-flash-bootloader=/home/jesper/zephyrproject/NES/app/build/esp-idf/build/bootloader/bootloader.bin
-    - --esp-flash-partition_table=/home/jesper/zephyrproject/NES/app/build/esp-idf/build/partitions_singleapp.bin
+    - --esp-idf-path=C:/Users/dagfi/Documents/School/NES/proj/zephyrproject/modules/hal/espressif
+    - --esp-flash-bootloader=C:/Users/dagfi/Documents/School/NES/proj/zephyrproject/NES/app/build/esp-idf/build/bootloader/bootloader.bin
+    - --esp-flash-partition_table=C:/Users/dagfi/Documents/School/NES/proj/zephyrproject/NES/app/build/esp-idf/build/partitions_singleapp.bin
     - --esp-partition-table-address=0x8000
     - --esp-boot-address=0x1000
     - --esp-app-address=0x10000
   esp32:
-    - --esp-idf-path=/home/jesper/zephyrproject/modules/hal/espressif
-    - --esp-flash-bootloader=/home/jesper/zephyrproject/NES/app/build/esp-idf/build/bootloader/bootloader.bin
-    - --esp-flash-partition_table=/home/jesper/zephyrproject/NES/app/build/esp-idf/build/partitions_singleapp.bin
+    - --esp-idf-path=C:/Users/dagfi/Documents/School/NES/proj/zephyrproject/modules/hal/espressif
+    - --esp-flash-bootloader=C:/Users/dagfi/Documents/School/NES/proj/zephyrproject/NES/app/build/esp-idf/build/bootloader/bootloader.bin
+    - --esp-flash-partition_table=C:/Users/dagfi/Documents/School/NES/proj/zephyrproject/NES/app/build/esp-idf/build/partitions_singleapp.bin
     - --esp-partition-table-address=0x8000
     - --esp-boot-address=0x1000
     - --esp-app-address=0x10000
   esp32:
-    - --esp-idf-path=/home/jesper/zephyrproject/modules/hal/espressif
-    - --esp-flash-bootloader=/home/jesper/zephyrproject/NES/app/build/esp-idf/build/bootloader/bootloader.bin
-    - --esp-flash-partition_table=/home/jesper/zephyrproject/NES/app/build/esp-idf/build/partitions_singleapp.bin
+    - --esp-idf-path=C:/Users/dagfi/Documents/School/NES/proj/zephyrproject/modules/hal/espressif
+    - --esp-flash-bootloader=C:/Users/dagfi/Documents/School/NES/proj/zephyrproject/NES/app/build/esp-idf/build/bootloader/bootloader.bin
+    - --esp-flash-partition_table=C:/Users/dagfi/Documents/School/NES/proj/zephyrproject/NES/app/build/esp-idf/build/partitions_singleapp.bin
     - --esp-partition-table-address=0x8000
     - --esp-boot-address=0x1000
     - --esp-app-address=0x10000

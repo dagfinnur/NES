@@ -16,7 +16,7 @@
 #define APP_PATCHLEVEL      0
 #define APP_VERSION_STRING  "1.0.0"
 
-#define APP_BUILD_VERSION 6d0840d4c7e7
+#define APP_BUILD_VERSION bcd91214ae9d
 
 
 #endif /* _APP_VERSION_H_ */

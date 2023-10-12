@@ -297,7 +297,7 @@ uintptr_t z_mrsh_k_wakeup(uintptr_t arg1, uintptr_t arg2, uintptr_t arg3,
          uintptr_t arg4, uintptr_t arg5, uintptr_t arg6, void *ssf);
 
 __weak ALIAS_OF(handler_no_syscall)
-uintptr_t z_mrsh_z_current_get(uintptr_t arg1, uintptr_t arg2, uintptr_t arg3,
+uintptr_t z_mrsh_k_sched_current_thread_query(uintptr_t arg1, uintptr_t arg2, uintptr_t arg3,
          uintptr_t arg4, uintptr_t arg5, uintptr_t arg6, void *ssf);
 
 __weak ALIAS_OF(handler_no_syscall)
@@ -705,7 +705,7 @@ const _k_syscall_handler_t _k_syscall_table[K_SYSCALL_LIMIT] = {
 	[K_SYSCALL_K_BUSY_WAIT] = z_mrsh_k_busy_wait,
 	[K_SYSCALL_K_YIELD] = z_mrsh_k_yield,
 	[K_SYSCALL_K_WAKEUP] = z_mrsh_k_wakeup,
-	[K_SYSCALL_Z_CURRENT_GET] = z_mrsh_z_current_get,
+	[K_SYSCALL_K_SCHED_CURRENT_THREAD_QUERY] = z_mrsh_k_sched_current_thread_query,
 	[K_SYSCALL_K_THREAD_ABORT] = z_mrsh_k_thread_abort,
 	[K_SYSCALL_K_THREAD_START] = z_mrsh_k_thread_start,
 	[K_SYSCALL_K_THREAD_TIMEOUT_EXPIRES_TICKS] = z_mrsh_k_thread_timeout_expires_ticks,

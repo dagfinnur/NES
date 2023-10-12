@@ -202,18 +202,18 @@ static inline void k_wakeup(k_tid_t thread)
 }
 
 
-extern k_tid_t z_impl_z_current_get(void);
+extern k_tid_t z_impl_k_sched_current_thread_query(void);
 
 __pinned_func
-static inline k_tid_t z_current_get(void)
+static inline k_tid_t k_sched_current_thread_query(void)
 {
 #ifdef CONFIG_USERSPACE
 	if (z_syscall_trap()) {
-		return (k_tid_t) arch_syscall_invoke0(K_SYSCALL_Z_CURRENT_GET);
+		return (k_tid_t) arch_syscall_invoke0(K_SYSCALL_K_SCHED_CURRENT_THREAD_QUERY);
 	}
 #endif
 	compiler_barrier();
-	return z_impl_z_current_get();
+	return z_impl_k_sched_current_thread_query();
 }
 
 

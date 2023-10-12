@@ -108,6 +108,8 @@
 
 #define Z_SYSCALL_DRIVER_ITS(ptr, op) Z_SYSCALL_DRIVER_GEN(ptr, op, its, ITS)
 
+#define Z_SYSCALL_DRIVER_TGPIO(ptr, op) Z_SYSCALL_DRIVER_GEN(ptr, op, tgpio, TGPIO)
+
 #define Z_SYSCALL_DRIVER_PCIE_CTRL(ptr, op) Z_SYSCALL_DRIVER_GEN(ptr, op, pcie_ctrl, PCIE_CTRL)
 
 #define Z_SYSCALL_DRIVER_SVC(ptr, op) Z_SYSCALL_DRIVER_GEN(ptr, op, svc, SVC)

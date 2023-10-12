@@ -92,6 +92,7 @@ case K_OBJ_DRIVER_WDT: ret = "wdt driver"; break;
 case K_OBJ_DRIVER_CAN_TRANSCEIVER: ret = "can_transceiver driver"; break;
 case K_OBJ_DRIVER_UART_MUX: ret = "uart_mux driver"; break;
 case K_OBJ_DRIVER_ITS: ret = "its driver"; break;
+case K_OBJ_DRIVER_TGPIO: ret = "tgpio driver"; break;
 case K_OBJ_DRIVER_PCIE_CTRL: ret = "pcie_ctrl driver"; break;
 case K_OBJ_DRIVER_SVC: ret = "svc driver"; break;
 case K_OBJ_DRIVER_BC12_EMUL: ret = "bc12_emul driver"; break;

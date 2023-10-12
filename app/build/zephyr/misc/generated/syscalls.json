@@ -585,7 +585,7 @@
     ],
     [
         [
-            "k_tid_t z_current_get",
+            "k_tid_t k_sched_current_thread_query",
             "void"
         ],
         "kernel.h",
@@ -2194,7 +2194,15 @@
     [
         [
             "int fuel_gauge_get_prop",
-            "const struct device *dev, struct fuel_gauge_property *props,\n\t\t\t\t  size_t props_len"
+            "const struct device *dev, fuel_gauge_prop_t prop,\n\t\t\t\t  union fuel_gauge_prop_val *val"
+        ],
+        "fuel_gauge.h",
+        false
+    ],
+    [
+        [
+            "int fuel_gauge_get_props",
+            "const struct device *dev, fuel_gauge_prop_t *props,\n\t\t\t\t   union fuel_gauge_prop_val *vals, size_t len"
         ],
         "fuel_gauge.h",
         false
@@ -2202,7 +2210,15 @@
     [
         [
             "int fuel_gauge_set_prop",
-            "const struct device *dev, struct fuel_gauge_property *props,\n\t\t\t\t  size_t props_len"
+            "const struct device *dev, fuel_gauge_prop_t prop,\n\t\t\t\t  union fuel_gauge_prop_val val"
+        ],
+        "fuel_gauge.h",
+        false
+    ],
+    [
+        [
+            "int fuel_gauge_set_props",
+            "const struct device *dev, fuel_gauge_prop_t *props,\n\t\t\t\t   union fuel_gauge_prop_val *vals, size_t len"
         ],
         "fuel_gauge.h",
         false
@@ -2210,7 +2226,7 @@
     [
         [
             "int fuel_gauge_get_buffer_prop",
-            "const struct device *dev,\n\t\t\t\t\tstruct fuel_gauge_buffer_property *prop, void *dst,\n\t\t\t\t\tsize_t dst_len"
+            "const struct device *dev, fuel_gauge_prop_t prop_type,\n\t\t\t\t\t void *dst, size_t dst_len"
         ],
         "fuel_gauge.h",
         false
@@ -2562,7 +2578,7 @@
     [
         [
             "int mdio_read",
-            "const struct device *dev, uint8_t prtad, uint8_t devad,\n\t\t\tuint16_t *data"
+            "const struct device *dev, uint8_t prtad, uint8_t regad,\n\t\t\tuint16_t *data"
         ],
         "mdio.h",
         false
@@ -2570,7 +2586,23 @@
     [
         [
             "int mdio_write",
-            "const struct device *dev, uint8_t prtad, uint8_t devad,\n\t\t\t uint16_t data"
+            "const struct device *dev, uint8_t prtad, uint8_t regad,\n\t\t\t uint16_t data"
+        ],
+        "mdio.h",
+        false
+    ],
+    [
+        [
+            "int mdio_read_c45",
+            "const struct device *dev, uint8_t prtad,\n\t\t\t    uint8_t devad, uint16_t regad, uint16_t *data"
+        ],
+        "mdio.h",
+        false
+    ],
+    [
+        [
+            "int mdio_write_c45",
+            "const struct device *dev, uint8_t prtad,\n\t\t\t     uint8_t devad, uint16_t regad, uint16_t data"
         ],
         "mdio.h",
         false
@@ -3213,6 +3245,54 @@
             "const struct device *dev, bool enable"
         ],
         "nrf_qspi_nor.h",
+        false
+    ],
+    [
+        [
+            "int tgpio_port_get_time",
+            "const struct device *dev, uint64_t *current_time"
+        ],
+        "timeaware_gpio.h",
+        false
+    ],
+    [
+        [
+            "int tgpio_port_get_cycles_per_second",
+            "const struct device *dev, uint32_t *cycles"
+        ],
+        "timeaware_gpio.h",
+        false
+    ],
+    [
+        [
+            "int tgpio_pin_disable",
+            "const struct device *dev, uint32_t pin"
+        ],
+        "timeaware_gpio.h",
+        false
+    ],
+    [
+        [
+            "int tgpio_pin_config_ext_timestamp",
+            "const struct device *dev, uint32_t pin,\n\t\t\t\t\t      uint32_t event_polarity"
+        ],
+        "timeaware_gpio.h",
+        false
+    ],
+    [
+        [
+            "int tgpio_pin_periodic_output",
+            "const struct device *dev, uint32_t pin,\n\t\t\t\t\t uint64_t start_time, uint64_t repeat_interval,\n\t\t\t\t\t bool periodic_enable"
+        ],
+        "timeaware_gpio.h",
+        false
+    ],
+    [
+        [
+            "int tgpio_pin_read_ts_ec",
+            "const struct device *dev, uint32_t pin, uint64_t *timestamp,\n\t\t\t\t    uint64_t *event_count"
+        ],
+        "timeaware_gpio.h",
         false
     ],
     [
