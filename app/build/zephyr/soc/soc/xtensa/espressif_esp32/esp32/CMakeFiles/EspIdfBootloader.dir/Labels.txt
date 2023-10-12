@@ -1,0 +1,13 @@
+# Target labels
+ EspIdfBootloader
+# Source files and their labels
+/home/jesper/zephyrproject/NES/app/build/zephyr/soc/soc/xtensa/espressif_esp32/esp32/CMakeFiles/EspIdfBootloader
+/home/jesper/zephyrproject/NES/app/build/zephyr/soc/soc/xtensa/espressif_esp32/esp32/CMakeFiles/EspIdfBootloader.rule
+/home/jesper/zephyrproject/NES/app/build/zephyr/soc/soc/xtensa/espressif_esp32/esp32/CMakeFiles/EspIdfBootloader-complete.rule
+/home/jesper/zephyrproject/NES/app/build/esp-idf/src/EspIdfBootloader-stamp/EspIdfBootloader-build.rule
+/home/jesper/zephyrproject/NES/app/build/esp-idf/src/EspIdfBootloader-stamp/EspIdfBootloader-configure.rule
+/home/jesper/zephyrproject/NES/app/build/esp-idf/src/EspIdfBootloader-stamp/EspIdfBootloader-download.rule
+/home/jesper/zephyrproject/NES/app/build/esp-idf/src/EspIdfBootloader-stamp/EspIdfBootloader-install.rule
+/home/jesper/zephyrproject/NES/app/build/esp-idf/src/EspIdfBootloader-stamp/EspIdfBootloader-mkdir.rule
+/home/jesper/zephyrproject/NES/app/build/esp-idf/src/EspIdfBootloader-stamp/EspIdfBootloader-patch.rule
+/home/jesper/zephyrproject/NES/app/build/esp-idf/src/EspIdfBootloader-stamp/EspIdfBootloader-update.rule
