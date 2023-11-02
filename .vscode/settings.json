@@ -1,0 +1,13 @@
+{
+    "workbench.colorCustomizations": {
+        "[SynthWave '84]": {
+            "activityBar.foreground": "#ff00f2a1",
+            "activityBar.background": "#1a0e41b3",
+            "editor.lineHighlightBackground": "#53095b",
+            "editor.selectionBackground": "#2ce3ffae"
+        },
+        "activityBar.background": "#2B216C",
+        "titleBar.activeBackground": "#3C2E97",
+        "titleBar.activeForeground": "#FBFAFE"
+    }
+}
