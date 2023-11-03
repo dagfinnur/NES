@@ -1,0 +1,9 @@
+{
+    "idf.flashType": "UART",
+    "idf.port": "/dev/ttyUSB1",
+    "idf.adapterTargetName": "esp32",
+    "files.associations": {
+        "inttypes.h": "c",
+        "rfid_read_main.h": "c"
+    }
+}
