@@ -19,12 +19,45 @@
 #include "nvs.h"
 #include "nvs_flash.h"
 
-
 // Define SSID and PSK
 #define EXAMPLE_ESP_WIFI_SSID      "Jesper"
 #define EXAMPLE_ESP_WIFI_PASS      "12345677"
 
+// Define the RFID & fingerprint system to utilize each message independently
+//#define ESP_RFID_HOST "SOMEVALIDATION OF BEING A RFID"
+//#define ESP_FINGERPRINT_HOST "SOMEVALIDATION OF BEING A FINGERPRINT" 
+
+// Additional includes for syslog
+#include <arpa/inet.h>
+#include <netinet/in.h>
+#include <sys/socket.h>
+
 static const char *TAG = "wifi";
+
+// Create a socket and send a syslog message to Host B
+static void sendSyslogMessage(const char* message)
+{
+    int senderSocket = socket(AF_INET, SOCK_DGRAM, 0);
+    if (senderSocket == -1) {
+        ESP_LOGE(TAG, "Socket creation failed");
+        return;
+    }
+
+    struct sockaddr_in destAddr;
+    destAddr.sin_family = AF_INET;
+    destAddr.sin_port = htons(514); // Specify the communication port for sending syslog messages
+    destAddr.sin_addr.s_addr = inet_addr("192.168.1.246"); // CHANGE THIS TO THE IP OF RECEIVER HOST
+
+    int result = sendto(senderSocket, message, strlen(message), 0, (struct sockaddr*)&destAddr, sizeof(destAddr));
+    if (result == -1) {
+        ESP_LOGE(TAG, "Syslog message sending failed");
+    } else {
+        ESP_LOGI(TAG, "Syslog message sent: %s", message);
+    }
+
+    close(senderSocket);
+}
+
 
 static void event_handler(void* arg, esp_event_base_t event_base,
                           int32_t event_id, void* event_data)
@@ -36,7 +69,47 @@ static void event_handler(void* arg, esp_event_base_t event_base,
     } else if (event_base == IP_EVENT && event_id == IP_EVENT_STA_GOT_IP) {
         ip_event_got_ip_t* event = (ip_event_got_ip_t*) event_data;
         ESP_LOGI(TAG, "got ip:%s", ip4addr_ntoa(&event->ip_info.ip));
+    
     }
+}
+
+
+// This function listens for incoming syslog messages on Host B
+static void receiveSyslogMessages()
+{
+    int receiverSocket = socket(AF_INET, SOCK_DGRAM, 0);
+    if (receiverSocket == -1) {
+        ESP_LOGE(TAG, "Socket creation failed");
+        return;
+    }
+
+    struct sockaddr_in myAddr;
+    myAddr.sin_family = AF_INET;
+    myAddr.sin_port = htons(514); // Specify the communication port for receiving syslog messages
+    myAddr.sin_addr.s_addr = INADDR_ANY;
+
+    if (bind(receiverSocket, (struct sockaddr*)&myAddr, sizeof(myAddr)) == -1) {
+        ESP_LOGE(TAG, "Bind failed");
+        close(receiverSocket);
+        return;
+    }
+
+    char buffer[1024]; // Adjust the buffer size as needed... not sure what the max size is, just picked 1024 for now
+
+    while (1) {
+        int bytesRead = recvfrom(receiverSocket, buffer, sizeof(buffer), 0, NULL, NULL);
+
+        if (bytesRead > 0) {
+            buffer[bytesRead] = '\0';
+            ESP_LOGI(TAG, "Received syslog message: %s", buffer);
+            // Here we can parse the message and utilize it as needed for the lock system
+            // sample: if buffer includes RFID VALIDATION then WAIT FOR FINGERPRINT VALIDATION
+            // sample: if buffer includes FINGERPRINT VALIDATION then OPEN LOCK
+            // AND VICE VERSA
+        }
+    }
+
+    close(receiverSocket);
 }
 
 // connect to the network
@@ -63,6 +136,7 @@ static void connectToANetwork(void)
 }
 
 
+// Connect to the network and start listening for syslog messages
 void app_main(void)
 {
     // Initialize NVS
@@ -74,5 +148,9 @@ void app_main(void)
     ESP_ERROR_CHECK( ret );
     connectToANetwork();
 
-    //wifi_scan();
+    // Sending syslog message to internal host
+    //sendSyslogMessage("Greetings from ESP32!"); // send RFID or fingerprint data instead here
+
+    // Receiving syslog messages from external host
+    receiveSyslogMessages();
 }
