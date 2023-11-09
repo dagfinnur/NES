@@ -4,13 +4,14 @@
 #include <unistd.h>
 
 #include "network.h"
+#include <string.h>
 
 static const char* TAG1 = "rc522-demo";
 static rc522_handle_t scanner;
 static int mode = 0; //0 for read; 1 for write
 uint64_t master_tag = 903303070856; //basecamp tag
 uint64_t authorized_tag = 813411536073; //blue rfid original tag
-
+char* myip = "hello";
 
 
 void wifi(void) {
@@ -41,7 +42,7 @@ void wifi(void) {
 static void rc522_handler(void* arg, esp_event_base_t base, int32_t event_id, void* event_data)
 {
     rc522_event_data_t* data = (rc522_event_data_t*) event_data;
-
+    char* message = "";
     switch(event_id) {
         case RC522_EVENT_TAG_SCANNED: {
                 rc522_tag_t* tag = (rc522_tag_t*) data->ptr;
@@ -58,7 +59,8 @@ static void rc522_handler(void* arg, esp_event_base_t base, int32_t event_id, vo
                 else if (tag->serial_number == authorized_tag) {
                     printf("AUTHORIZED READ\n");
                     //wifi()
-                    sendSyslogMessage("Greetings from ESP32!");
+                    message = sprintf("Greetings from the RFID-BOARD!\n IP: %s\n  Tag Read: %d\n", myip, tag->serial_number);
+                    sendSyslogMessage(message);
                 }
                 else {
                     printf("UNAUTHORIZED READ\n");
@@ -92,5 +94,14 @@ void app_main() {
     }
     ESP_ERROR_CHECK( ret );
     connectToANetwork();
+    /*
+    esp_netif_t *netif = esp_netif_create_default_wifi_sta(); // Create a default WiFi station network interface
+    esp_netif_ip_info_t ip_info;
+    if (esp_netif_get_ip_info(netif, &ip_info) == ESP_OK)
+    {
+        myip = &ip_info.ip;
+    } else {
+        ESP_LOGE("APP", "Failed to get IP info");
+    }*/
     rfid_read();
 }

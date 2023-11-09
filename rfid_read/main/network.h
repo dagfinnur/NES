@@ -15,6 +15,8 @@
 #include "esp_vfs_fat.h"
 #include "driver/sdmmc_host.h"
 #include "lwip/inet.h"
+#include "esp_netif.h"
+#include "lwip/inet.h"
 
 #include "nvs.h"
 #include "nvs_flash.h"
@@ -72,7 +74,6 @@ static void event_handler(void* arg, esp_event_base_t event_base,
     
     }
 }
-
 
 // This function listens for incoming syslog messages on Host B
 static void receiveSyslogMessages()
@@ -134,27 +135,3 @@ static void connectToANetwork(void)
     esp_event_handler_register(IP_EVENT, IP_EVENT_STA_GOT_IP, &event_handler, NULL);
     esp_wifi_start();
 }
-
-    ///////////////////////////////////////////////////////////////////////////////////////////////////
-
-/*
-// Connect to the network and start listening for syslog messages
-void app_main(void)
-{
-
-    // Initialize NVS
-    esp_err_t ret = nvs_flash_init();
-    if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND) {
-        ESP_ERROR_CHECK(nvs_flash_erase());
-        ret = nvs_flash_init();
-    }
-    ESP_ERROR_CHECK( ret );
-    connectToANetwork();
-
-    // Sending syslog message to internal host
-    //sendSyslogMessage("Greetings from ESP32!"); // send RFID or fingerprint data instead here
-
-    // Receiving syslog messages from external host
-    receiveSyslogMessages();
-}
-*/
