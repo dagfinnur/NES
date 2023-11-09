@@ -3,7 +3,7 @@
 #include "rc522.h"
 #include <unistd.h>
 
-#include "rfid_read_main.h"
+#include "network.h"
 
 static const char* TAG1 = "rc522-demo";
 static rc522_handle_t scanner;
@@ -14,6 +14,7 @@ uint64_t authorized_tag = 813411536073; //blue rfid original tag
 
 
 void wifi(void) {
+    /*
     //Initialize NVS
     esp_err_t ret = nvs_flash_init();
     if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND) {
@@ -23,7 +24,18 @@ void wifi(void) {
     ESP_ERROR_CHECK(ret);
 
     ESP_LOGI(TAG, "ESP_WIFI_MODE_STA");
-    wifi_init_sta();
+    wifi_init_sta();*/
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////////
+
+     // Initialize NVS
+    
+
+    // Sending syslog message to internal host
+    //sendSyslogMessage("Greetings from ESP32!"); // send RFID or fingerprint data instead here
+
+    // Receiving syslog messages from external host
+    receiveSyslogMessages();
 }
 
 static void rc522_handler(void* arg, esp_event_base_t base, int32_t event_id, void* event_data)
@@ -45,7 +57,8 @@ static void rc522_handler(void* arg, esp_event_base_t base, int32_t event_id, vo
                 }
                 else if (tag->serial_number == authorized_tag) {
                     printf("AUTHORIZED READ\n");
-                    wifi();
+                    //wifi()
+                    sendSyslogMessage("Greetings from ESP32!");
                 }
                 else {
                     printf("UNAUTHORIZED READ\n");
@@ -65,11 +78,19 @@ void rfid_read(void) {
         .spi.sda_gpio = 32,
     };
     
+    //RC522 FRAMEWORK EVENT LOGIC
     rc522_create(&config, &scanner);
     rc522_register_events(scanner, RC522_EVENT_ANY, rc522_handler, NULL);
     rc522_start(scanner);
 }
 
 void app_main() {
+    esp_err_t ret = nvs_flash_init();
+    if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND) {
+        ESP_ERROR_CHECK(nvs_flash_erase());
+        ret = nvs_flash_init();
+    }
+    ESP_ERROR_CHECK( ret );
+    connectToANetwork();
     rfid_read();
 }
