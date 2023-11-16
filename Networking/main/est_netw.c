@@ -20,8 +20,8 @@
 #include "nvs_flash.h"
 
 // Define SSID and PSK
-#define EXAMPLE_ESP_WIFI_SSID      "Jesper"
-#define EXAMPLE_ESP_WIFI_PASS      "12345677"
+#define EXAMPLE_ESP_WIFI_SSID      "Diogo"
+#define EXAMPLE_ESP_WIFI_PASS      "abcdefgh"
 
 // Define the RFID & fingerprint system to utilize each message independently
 //#define ESP_RFID_HOST "SOMEVALIDATION OF BEING A RFID"
@@ -95,17 +95,27 @@ static void receiveSyslogMessages()
     }
 
     char buffer[1024]; // Adjust the buffer size as needed... not sure what the max size is, just picked 1024 for now
+    //char buffer[65535]; // Maximum buffer size for UDP packets
 
     while (1) {
-        int bytesRead = recvfrom(receiverSocket, buffer, sizeof(buffer), 0, NULL, NULL);
+        struct sockaddr_in sourceAddr;
+        socklen_t addrLen = sizeof(sourceAddr);
+        int bytesRead = recvfrom(receiverSocket, buffer, sizeof(buffer) - 1, 0, (struct sockaddr*)&sourceAddr, &addrLen);
 
         if (bytesRead > 0) {
             buffer[bytesRead] = '\0';
-            ESP_LOGI(TAG, "Received syslog message: %s", buffer);
-            // Here we can parse the message and utilize it as needed for the lock system
-            // sample: if buffer includes RFID VALIDATION then WAIT FOR FINGERPRINT VALIDATION
-            // sample: if buffer includes FINGERPRINT VALIDATION then OPEN LOCK
-            // AND VICE VERSA
+            char addrStr[INET_ADDRSTRLEN];
+            inet_ntop(AF_INET, &sourceAddr.sin_addr, addrStr, sizeof(addrStr));
+            ESP_LOGI(TAG, "Received syslog message: %s from %s", buffer, addrStr);
+
+            // // Here we can parse the message and utilize it as needed for the lock system
+            // if (strstr(buffer, "RFID VALIDATION") != NULL) {
+            //     // Handle RFID VALIDATION
+            //     ESP_LOGI(TAG, "RFID VALIDATION received. Waiting for FINGERPRINT VALIDATION.");
+            // } else if (strstr(buffer, "FINGERPRINT VALIDATION") != NULL) {
+            //     // Handle FINGERPRINT VALIDATION
+            //     ESP_LOGI(TAG, "FINGERPRINT VALIDATION received. Opening lock.");
+            // }
         }
     }
 
@@ -147,6 +157,7 @@ void app_main(void)
     }
     ESP_ERROR_CHECK( ret );
     connectToANetwork();
+
 
     // Sending syslog message to internal host
     //sendSyslogMessage("Greetings from ESP32!"); // send RFID or fingerprint data instead here
