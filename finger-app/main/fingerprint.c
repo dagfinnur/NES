@@ -13,7 +13,8 @@ void int32_to_param(uint32_t value, char *param_arr)
 
 void init_uart(void)
 {
-    uart_driver_install(UART_NUM_1, RX_BUF_SIZE * 2, 0, 0, NULL, 0);
+    QueueHandle_t uart_queue;
+    uart_driver_install(UART_NUM_1, RX_BUF_SIZE * 2, 0, 10, &uart_queue, 0);
 }
 
 void configure_uart(int baudrate, int rx_pin, int tx_pin)
@@ -74,13 +75,13 @@ void write_uart()
     const int len = 12;
     const int txBytes = uart_write_bytes(UART_NUM_1, cmd_buffer, len);
     // print_command(data);
-    printf("*** Sent %d bytes ***\n", txBytes);
+    // printf("*** Sent %d bytes ***\n", txBytes);
     return;
 }
 
-int16_t read_uart(uint16_t bytes)
+int16_t read_uart(uint16_t bytes, uint32_t cursor)
 {
-    const int rxBytes = uart_read_bytes(UART_NUM_1, resp_buffer, bytes, (TIME_PER_BYTE_MS * bytes));
+    const int rxBytes = uart_read_bytes(UART_NUM_1, (resp_buffer + cursor), bytes, (100));
     // printf("### Read %d bytes ###\n", rxBytes);
 
     return (uint16_t)rxBytes;
@@ -101,7 +102,7 @@ uint16_t Checksum(char *packet, int packet_len)
 void InitFingerprint(void)
 {
     cmd_buffer = (char *)malloc(COMMAND_PACKET_LENGTH * sizeof(char));
-    resp_buffer = (char *)malloc((RX_BUF_SIZE + 1) * sizeof(char));
+    resp_buffer = (char *)malloc(((RX_BUF_SIZE * 2) + 1) * sizeof(char));
 };
 
 void ExitFingerprint(void)
@@ -151,12 +152,12 @@ void SendCommand(uint32_t params, char cmd)
 
 void ReadResponse(uint32_t bytes)
 {
-    int16_t bytesRead = read_uart(bytes);
+    int16_t bytesRead = read_uart(bytes, 0);
 
     // Get response
     int16_t response_code = returnResponseCode();
 
-    printf("Response code was 0x%04x\n", response_code);
+    // printf("Response code was 0x%04x\n", response_code);
     fflush(stdout);
 
     // If the response code is -1, something went wrong when readning the bytes
@@ -186,24 +187,23 @@ void ReadDataUsingBuffer()
     int length = 0;
     ESP_ERROR_CHECK(uart_get_buffered_data_len(UART_NUM_1, (size_t *)&length));
     printf("Initial rxbuffer: %d\n", length);
-        fflush(stdout);
+    fflush(stdout);
     while (length > 0)
     {
-        printf("rxbuffer: %d\n", length);
         fflush(stdout);
-        int bytes_read = read_uart(length);
+        int bytes_read = read_uart(length, 0);
         if (bytes_read < length)
         {
             printf("FUCK\n");
             fflush(stdout);
         }
-        else
-        {
-            for (int16_t i = 0; i < bytes_read; i++)
-            {
-                printf("0x%02x ", resp_buffer[i]);
-            }
-        }
+        // else
+        // {
+        //     for (int16_t i = 0; i < bytes_read; i++)
+        //     {
+        //         printf("0x%02x ", resp_buffer[i]);
+        //     }
+        // }
         ESP_ERROR_CHECK(uart_get_buffered_data_len(UART_NUM_1, (size_t *)&length));
         printf("new rxbuffer: %d\n", length);
         fflush(stdout);
@@ -225,10 +225,10 @@ void ReadDataUsingBuffer()
     // }
 }
 
-void ReadData(uint16_t size)
+void ReadData(uint16_t size, char cursor)
 {
     // // Split the read into smaller reads of sizes of 1024 bytes
-    // uint16_t read_size = 1024;
+    // uint16_t read_size = RX_BUF_SIZE;
     // uint16_t number_of_reads = size / read_size;
     // uint16_t remaining_bytes = size - (read_size * number_of_reads);
     // int16_t bytes_read;
@@ -263,19 +263,19 @@ void ReadData(uint16_t size)
     //     }
     // }
 
-    int16_t bytes_read = read_uart(size);
+    int16_t bytes_read = read_uart(size, cursor);
     if (bytes_read < size)
     {
         printf("FUCK\n");
         fflush(stdout);
     }
-    else
-    {
-        for (int16_t i = 0; i < bytes_read; i++)
-        {
-            printf("0x%02x ", resp_buffer[i]);
-        }
-    }
+    // else
+    // {
+    //     for (int16_t i = 0; i < bytes_read; i++)
+    //     {
+    //         printf("0x%02x ", resp_buffer[i]);
+    //     }
+    // }
 
     printf("\n");
     fflush(stdout);
@@ -312,19 +312,22 @@ void ChangeBaudrate(uint32_t baudrate)
     SendCommand(baudrate, CMD_CHANGE_BAUDRATE);
 }
 
-void GetEnrolledCount(void)
+uint32_t GetEnrolledCount()
 {
+    uint32_t count = 0;
     SendCommand(0x00, CMD_GET_ENROLL_COUNT);
     // print_response();
     if (returnResponseCode() == CMD_ACK)
     {
-        printf("Number of enrolled fingerprints: %ld\n", returnParameter());
+        count = returnParameter();
+        printf("Number of enrolled fingerprints: %ld\n", count);
+        return count;
     }
     else
     {
         printf("Failed to get Enroll Count\n");
         fflush(stdout);
-        return;
+        return count;
     }
 }
 
@@ -333,7 +336,7 @@ void GetImage(void)
     SendCommand(0x00, CMD_GET_IMAGE);
     if (returnResponseCode() == CMD_ACK)
     {
-        ReadData(52216);
+        ReadData(52216, 0);
     }
 }
 
@@ -342,7 +345,37 @@ void GetRawImage(void)
     SendCommand(0x00, CMD_GET_RAW_IMAGE);
     if (returnResponseCode() == CMD_ACK)
     {
-        ReadData(19200);
+        uint16_t size = 19200;
+        // Split the read into smaller reads of sizes of 1024 bytes
+        uint16_t read_size = RX_BUF_SIZE;
+        uint16_t number_of_reads = size / read_size;
+        uint16_t remaining_bytes = size - (read_size * number_of_reads);
+
+        for (int i = 0; i < number_of_reads; i++)
+        {
+            printf("cycle %d \n", i);
+            fflush(stdout);
+            ReadData(read_size, (read_size * i));
+        }
+
+        ReadData(remaining_bytes, (read_size * number_of_reads));
+
+        // Print the data
+
+        for (int i = 0; i < number_of_reads; i++)
+        {
+            for (int u = 0; u < read_size; u++)
+            {
+                printf("0x%02x ", resp_buffer[(i * read_size) + u]);
+            }
+            esp_light_sleep_start();
+        }
+        for (int u = 0; u < remaining_bytes; u++)
+        {
+            printf("0x%02x ", resp_buffer[(read_size * read_size) + u]);
+        }
+        printf("\n");
+        fflush(stdout);
     }
 }
 
@@ -353,11 +386,154 @@ void GetTemplate(uint8_t id)
     {
         printf("ok\n");
         fflush(stdout);
-        // ReadData(498);
-        ReadDataUsingBuffer();
+        ReadData(498, 0);
+        // ReadDataUsingBuffer();
     }
 }
 
+bool CaptureFingerFast()
+{
+    SendCommand(0x00, CMD_CAPTURE_FINGER);
+    if (returnResponseCode() == CMD_ACK)
+    {
+        return true;
+    }
+    else
+    {
+        printf("Failed to capture finger (fast) \n");
+        printf("Error code: %ld\n", returnParameter());
+    }
+
+    return false;
+}
+
+bool CaptureFingerSlow()
+{
+    SendCommand(0x01, CMD_CAPTURE_FINGER);
+    if (returnResponseCode() == CMD_ACK)
+    {
+        return true;
+    }
+    else
+    {
+        printf("Failed to capture finger (slow) \n");
+        printf("Error code: %ld\n", returnParameter());
+    }
+
+    return false;
+}
+
+bool Identification()
+{
+    bool id_ok = false;
+    SendCommand(0x00, CMD_IDENTIFY);
+    if (returnResponseCode() == CMD_ACK)
+    {
+        printf("Indentified finger with ID: %ld\n", returnParameter());
+        return true;
+    }
+    else
+    {
+        printf("Fingerprint was not authorized\n");
+        return false;
+    }
+    fflush(stdout);
+
+    return id_ok;
+}
+
+bool IsFingerPressed()
+{
+    bool pressed = false;
+    SendCommand(0x00, CMD_IS_PRESS_FINGER);
+    if (returnResponseCode() == CMD_ACK)
+    {
+        uint32_t param = returnParameter();
+        if (param == 0)
+        {
+            printf("Finger is pressed\n");
+            pressed = true;
+            return pressed;
+        } else {
+            printf("Finger is not pressed\n");
+            pressed = false;
+            return pressed;
+        }
+    } else {
+        printf("Failed to get FingerPressed\n");
+    }
+
+    return pressed;
+}
+
+void EnrollStart(uint32_t id)
+{
+    SendCommand(id, CMD_ENROLL_START);
+    if (returnResponseCode() == CMD_ACK)
+    {
+        printf("Start enroll for ID %ld\n", id);
+    }
+}
+
+void EnrollFirst()
+{
+    SendCommand(0x00, CMD_ENROLL_FIRST);
+    if (returnResponseCode() == CMD_ACK)
+    {
+        printf("Enrolled first\n");
+    }
+    else
+    {
+        printf("Failed to enroll first\n");
+    }
+    fflush(stdout);
+}
+
+void EnrollSecond()
+{
+    SendCommand(0x00, CMD_ENROLL_SECOND);
+    if (returnResponseCode() == CMD_ACK)
+    {
+        printf("Enrolled second\n");
+    }
+    else
+    {
+        printf("Failed to enroll second\n");
+    }
+    fflush(stdout);
+}
+void EnrollThird()
+{
+    SendCommand(0x00, CMD_ENROLL_THIRD);
+    if (returnResponseCode() == CMD_ACK)
+    {
+        printf("Enrolled third\n");
+    }
+    else
+    {
+        printf("Failed to enroll third\n");
+    }
+    fflush(stdout);
+}
+
+void Enroll(uint8_t num)
+{
+    if (num == 1)
+    {
+        EnrollFirst();
+        return;
+    }
+    if (num == 2)
+    {
+        EnrollSecond();
+        return;
+    }
+    if (num == 3)
+    {
+        EnrollThird();
+        return;
+    }
+}
 uint32_t returnParameter()
 {
     uint32_t param = 0;

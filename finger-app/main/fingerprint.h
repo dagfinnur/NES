@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "driver/uart.h"
+#include "esp_sleep.h"
 
 /*
 Command and error codes found in the GT-511C3 data sheet v2.1 (04/11/2016)
@@ -30,9 +31,9 @@ const char CMD_GET_ENROLL_COUNT = 0x20;
 const char CMD_CHECK_ENROLLED = 0x21;
 const char CMD_ENROLL_START = 0x22;
 const char CMD_ENROLL_FIRST = 0x23;
-const char CMD_ENROLL_SECOND = 0x23;
-const char CMD_ENROLL_THIRD = 0x23;
-const char CMD_IS_PRESS_FINGER = 0x25;
+const char CMD_ENROLL_SECOND = 0x24;
+const char CMD_ENROLL_THIRD = 0x25;
+const char CMD_IS_PRESS_FINGER = 0x26;
 const char CMD_DELETE_ID = 0x40;
 const char CMD_DELETE_ALL = 0x41;
 const char CMD_VERIFY = 0x50;
@@ -73,7 +74,7 @@ const uint16_t NACK_INVALID_PARAM = 0x1011;
 const uint16_t NACK_FINGER_IS_NOT_PRESSED = 0x1012;
 
 // UART
-static const int RX_BUF_SIZE = LARGEST_DATA_PACKET_BYTES;
+static const int RX_BUF_SIZE = 1024;
 int TIME_PER_BYTE_MS = 20;
 
 // Fingerprint
@@ -95,7 +96,7 @@ void write_uart();
 // Read UART returns the response code of bytes read
 // If no response code was read, returns -1
 // Takes a pointer to a char array, and a int of expected bytes to read
-int16_t read_uart(uint16_t bytes);
+int16_t read_uart(uint16_t bytes, uint32_t cursor);
 
 // Finger scanner functions
 uint16_t Checksum(char *packet, int len);
@@ -110,10 +111,15 @@ void Open(void);
 void Close(void);
 void LedOn(void);
 void LedOff(void);
-void GetEnrolledCount(void);
+uint32_t GetEnrolledCount();
 void GetImage(void);
 void GetRawImage(void);
 void GetTemplate(uint8_t id);
+bool CaptureFingerFast();
+bool CaptureFingerSlow();
+bool Identification();
+bool IsFingerPressed();
+void Enroll(uint8_t num);
 void ChangeBaudrate(uint32_t baudrate);
 
 #endif
