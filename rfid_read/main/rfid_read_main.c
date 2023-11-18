@@ -1,65 +1,63 @@
-#include <esp_log.h>
-#include <inttypes.h>
-#include "rc522.h"
-#include <unistd.h>
-
+#include "tags.h"
 #include "network.h"
-#include <string.h>
 
 static const char* TAG1 = "rc522-demo";
 static rc522_handle_t scanner;
 static int mode = 0; //0 for read; 1 for write
 uint64_t master_tag = 903303070856; //basecamp tag
-uint64_t authorized_tag = 813411536073; //blue rfid original tag
-char* myip = "hello";
+uint64_t authorized_tags[MAX_AUTH_TAGS] /*= 813411536073;*/ //blue rfid original tag
 
+int isAuthorized(uint64_t tag) {
+    //include logic for checking if tag is already on the list
+    int size = sizeof(authorized_tags) / sizeof(authorized_tags[0]);  // Size of your array
 
-void wifi(void) {
-    /*
-    //Initialize NVS
-    esp_err_t ret = nvs_flash_init();
-    if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND) {
-      ESP_ERROR_CHECK(nvs_flash_erase());
-      ret = nvs_flash_init();
+    for (int i = 0; i < size; ++i) {
+        if (authorized_tags[i] == number) {
+            return 1;
+        }
     }
-    ESP_ERROR_CHECK(ret);
+    return 0;
+}
 
-    ESP_LOGI(TAG, "ESP_WIFI_MODE_STA");
-    wifi_init_sta();*/
+void addTag() {
+    //include logic to add tag to the current list in the NVS
+    printf("Added tag.\n");
+}
 
-    ///////////////////////////////////////////////////////////////////////////////////////////////////
-
-     // Initialize NVS
-    
-
-    // Sending syslog message to internal host
-    //sendSyslogMessage("Greetings from ESP32!"); // send RFID or fingerprint data instead here
-
-    // Receiving syslog messages from external host
-    receiveSyslogMessages();
+void removeTag() {
+    //include logic to remove tag to the current list in the NVS
+    printf("Removed tag.\n");
+    ;
 }
 
 static void rc522_handler(void* arg, esp_event_base_t base, int32_t event_id, void* event_data)
 {
     rc522_event_data_t* data = (rc522_event_data_t*) event_data;
-    char* message = "";
+    char message[64];
+    char ip[16];
     switch(event_id) {
         case RC522_EVENT_TAG_SCANNED: {
                 rc522_tag_t* tag = (rc522_tag_t*) data->ptr;
                 ESP_LOGI(TAG1, "Tag scanned (sn: %" PRIu64 ")", tag->serial_number);
                 if (mode == 1) { 
-                    authorized_tag = tag->serial_number;
+                    if (isAuthorized(tag->serial_number)) {
+                        addTag();
+                    }
+                    else {
+                        removeTag();
+                    }
                     mode = 0;
                 }
                 else if (tag->serial_number == master_tag) {
                     printf("MASTER TAG.\n");
-                    printf("Please insert the new authorized key.\n");
+                    printf("Please insert the tag you want to add/remove.\n");
                     mode = 1;
                 }
                 else if (tag->serial_number == authorized_tag) {
                     printf("AUTHORIZED READ\n");
-                    //wifi()
-                    message = sprintf("Greetings from the RFID-BOARD!\n IP: %s\n  Tag Read: %d\n", myip, tag->serial_number);
+                    getip(&ip);
+                    sprintf(message, "%lld\n", tag->serial_number);
+                    printf("message to send: %s\n", message);
                     sendSyslogMessage(message);
                 }
                 else {
@@ -86,22 +84,19 @@ void rfid_read(void) {
     rc522_start(scanner);
 }
 
-void app_main() {
+void nvs_init {
+    // Initialize NVS
     esp_err_t ret = nvs_flash_init();
     if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND) {
         ESP_ERROR_CHECK(nvs_flash_erase());
         ret = nvs_flash_init();
     }
     ESP_ERROR_CHECK( ret );
+    
+}
+
+void app_main() {    
+    nvs_init();
     connectToANetwork();
-    /*
-    esp_netif_t *netif = esp_netif_create_default_wifi_sta(); // Create a default WiFi station network interface
-    esp_netif_ip_info_t ip_info;
-    if (esp_netif_get_ip_info(netif, &ip_info) == ESP_OK)
-    {
-        myip = &ip_info.ip;
-    } else {
-        ESP_LOGE("APP", "Failed to get IP info");
-    }*/
     rfid_read();
 }

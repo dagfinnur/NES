@@ -22,12 +22,13 @@
 #include "nvs_flash.h"
 
 // Define SSID and PSK
-#define EXAMPLE_ESP_WIFI_SSID      /*"Jesper"*/ "Diogo"
-#define EXAMPLE_ESP_WIFI_PASS      /*"12345677"*/ "abcdefgh"
+#define EXAMPLE_ESP_WIFI_SSID      /*"Jesper"* "Diogo" "Basecamp Guest" */ "Basecamp Resident 2E"
+#define EXAMPLE_ESP_WIFI_PASS      /*"12345677" "abcdefgh"  "AVeryGoodPass" */ "9SkinSaturdayNoon000"
+#define IP                         "172.16.45.134"
 
 // Define the RFID & fingerprint system to utilize each message independently
 //#define ESP_RFID_HOST "SOMEVALIDATION OF BEING A RFID"
-//#define ESP_FINGERPRINT_HOST "SOMEVALIDATION OF BEING A FINGERPRINT" 
+//#define ESP_FINGERPRINT_HOST "SOMEVALIDATION OF BEING A FINGERPRINT"
 
 // Additional includes for syslog
 #include <arpa/inet.h>
@@ -47,8 +48,8 @@ static void sendSyslogMessage(const char* message)
 
     struct sockaddr_in destAddr;
     destAddr.sin_family = AF_INET;
-    destAddr.sin_port = htons(514); // Specify the communication port for sending syslog messages
-    destAddr.sin_addr.s_addr = inet_addr("172.20.10.4"); // CHANGE THIS TO THE IP OF RECEIVER HOST
+    destAddr.sin_port = htons(1541); // Specify the communication port for sending syslog messages
+    destAddr.sin_addr.s_addr = inet_addr(IP); // CHANGE THIS TO THE IP OF RECEIVER HOST
 
     int result = sendto(senderSocket, message, strlen(message), 0, (struct sockaddr*)&destAddr, sizeof(destAddr));
     if (result == -1) {
@@ -60,6 +61,14 @@ static void sendSyslogMessage(const char* message)
     close(senderSocket);
 }
 
+/*
+void wifi(void) {
+    //sendSyslogMessage("Greetings from ESP32!"); // send RFID or fingerprint data instead here
+
+    // Receiving syslog messages from external host
+    receiveSyslogMessages();
+}
+*/
 
 static void event_handler(void* arg, esp_event_base_t event_base,
                           int32_t event_id, void* event_data)
@@ -134,4 +143,14 @@ static void connectToANetwork(void)
     esp_event_handler_register(WIFI_EVENT, ESP_EVENT_ANY_ID, &event_handler, NULL);
     esp_event_handler_register(IP_EVENT, IP_EVENT_STA_GOT_IP, &event_handler, NULL);
     esp_wifi_start();
+}
+
+char* getip(char* myip){
+    // IP address.
+    esp_netif_ip_info_t ip_info;
+    esp_netif_t *netif = netif_get_by_index(ESP_IF_WIFI_STA);
+    esp_netif_get_ip_info(netif, &ip_info);
+    printf("My IP: " IPSTR "\n", IP2STR(&ip_info.ip));
+    sprintf(myip, IPSTR, IP2STR(&ip_info.ip));
+    return myip;
 }
