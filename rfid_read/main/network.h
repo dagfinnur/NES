@@ -143,6 +143,9 @@ static void connectToANetwork(void)
     esp_wifi_set_config(WIFI_IF_STA, &wifi_config);
     esp_event_handler_register(WIFI_EVENT, ESP_EVENT_ANY_ID, &event_handler, NULL);
     esp_event_handler_register(IP_EVENT, IP_EVENT_STA_GOT_IP, &event_handler, NULL);
+    // Set Power Save to Minium
+    ESP_LOGI(TAG, "esp_wifi_set_ps().");
+    esp_wifi_set_ps(WIFI_PS_MIN_MODEM);
     esp_wifi_start();
 }
 
