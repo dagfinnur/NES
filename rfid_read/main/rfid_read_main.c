@@ -1,3 +1,25 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <ctype.h>
+#include <unistd.h>
+#include <limits.h>
+#include <string.h>
+
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
+#include "freertos/event_groups.h"
+#include "esp_system.h"
+#include "esp_wifi.h"
+#include "esp_event.h"
+#include "esp_log.h"
+#include "esp_vfs_fat.h"
+#include "driver/sdmmc_host.h"
+#include "lwip/inet.h"
+#include "esp_netif.h"
+
+#include "nvs.h"
+#include "nvs_flash.h"
+
 #include "tags.h"
 #include "network.h"
 
@@ -5,65 +27,43 @@ static const char* TAG1 = "rc522-demo";
 static rc522_handle_t scanner;
 static int mode = 0; //0 for read; 1 for write
 uint64_t master_tag = 903303070856; //basecamp tag
-uint64_t authorized_tags[MAX_AUTH_TAGS] /*= 813411536073;*/ //blue rfid original tag
-
-int isAuthorized(uint64_t tag) {
-    //include logic for checking if tag is already on the list
-    int size = sizeof(authorized_tags) / sizeof(authorized_tags[0]);  // Size of your array
-
-    for (int i = 0; i < size; ++i) {
-        if (authorized_tags[i] == number) {
-            return 1;
-        }
-    }
-    return 0;
-}
-
-void addTag() {
-    //include logic to add tag to the current list in the NVS
-    printf("Added tag.\n");
-}
-
-void removeTag() {
-    //include logic to remove tag to the current list in the NVS
-    printf("Removed tag.\n");
-    ;
-}
+/*uint64_t authorized_tags[MAX_TAGS] = 813411536073;*/ //blue rfid original tag
 
 static void rc522_handler(void* arg, esp_event_base_t base, int32_t event_id, void* event_data)
 {
     rc522_event_data_t* data = (rc522_event_data_t*) event_data;
     char message[64];
-    char ip[16];
+    char key[16];
     switch(event_id) {
         case RC522_EVENT_TAG_SCANNED: {
-                rc522_tag_t* tag = (rc522_tag_t*) data->ptr;
-                ESP_LOGI(TAG1, "Tag scanned (sn: %" PRIu64 ")", tag->serial_number);
-                if (mode == 1) { 
-                    if (isAuthorized(tag->serial_number)) {
-                        addTag();
-                    }
-                    else {
-                        removeTag();
-                    }
-                    mode = 0;
-                }
-                else if (tag->serial_number == master_tag) {
-                    printf("MASTER TAG.\n");
-                    printf("Please insert the tag you want to add/remove.\n");
-                    mode = 1;
-                }
-                else if (tag->serial_number == authorized_tag) {
-                    printf("AUTHORIZED READ\n");
-                    getip(&ip);
-                    sprintf(message, "%lld\n", tag->serial_number);
-                    printf("message to send: %s\n", message);
-                    sendSyslogMessage(message);
+            rc522_tag_t* tag = (rc522_tag_t*) data->ptr;
+            ESP_LOGI(TAG1, "Tag scanned (sn: %" PRIu64 ")", tag->serial_number);
+            sprintf(key, "%lld", tag->serial_number);
+            if (mode == 1) { 
+                if (isAuthorized(key)) {
+                    removeTag(key);
                 }
                 else {
-                    printf("UNAUTHORIZED READ\n");
+                    addTag(key, tag->serial_number);
                 }
+                mode = 0;
+            }
+            else if (tag->serial_number == master_tag) {
+                printf("MASTER TAG.\n");
+                printf("Please insert the tag you want to add/remove.\n");
+                mode = 1;
+            }
+            else if (isAuthorized(key)) {
+                printf("AUTHORIZED READ\n");
+                sprintf(message, "%lld\n", tag->serial_number);
+                printf("message to send: %s\n", message);
+                sendSyslogMessage(message);
+            }
+            else {
+                printf("UNAUTHORIZED READ\n");
+            }         
         }
+        print_nvs_entries();
         break;
     }
 }
@@ -84,19 +84,8 @@ void rfid_read(void) {
     rc522_start(scanner);
 }
 
-void nvs_init {
-    // Initialize NVS
-    esp_err_t ret = nvs_flash_init();
-    if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND) {
-        ESP_ERROR_CHECK(nvs_flash_erase());
-        ret = nvs_flash_init();
-    }
-    ESP_ERROR_CHECK( ret );
-    
-}
-
 void app_main() {    
-    nvs_init();
+    init_nvs();
     connectToANetwork();
     rfid_read();
 }

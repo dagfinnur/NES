@@ -20,11 +20,12 @@
 
 #include "nvs.h"
 #include "nvs_flash.h"
+#include "rc522.h"
 
 // Define SSID and PSK
-#define EXAMPLE_ESP_WIFI_SSID      /*"Jesper"* "Diogo" "Basecamp Guest" */ "Basecamp Resident 2E"
-#define EXAMPLE_ESP_WIFI_PASS      /*"12345677" "abcdefgh"  "AVeryGoodPass" */ "9SkinSaturdayNoon000"
-#define IP                         "172.16.45.134"
+#define EXAMPLE_ESP_WIFI_SSID      "Jesper" /* "Diogo" "Basecamp Resident 2E" "Basecamp Guest" */
+#define EXAMPLE_ESP_WIFI_PASS      "12345677"/* "abcdefgh"  "9SkinSaturdayNoon000" "AVeryGoodPass" */
+#define IP                         "172.20.10.8"
 
 // Define the RFID & fingerprint system to utilize each message independently
 //#define ESP_RFID_HOST "SOMEVALIDATION OF BEING A RFID"
@@ -48,7 +49,7 @@ static void sendSyslogMessage(const char* message)
 
     struct sockaddr_in destAddr;
     destAddr.sin_family = AF_INET;
-    destAddr.sin_port = htons(1541); // Specify the communication port for sending syslog messages
+    destAddr.sin_port = htons(514); // Specify the communication port for sending syslog messages
     destAddr.sin_addr.s_addr = inet_addr(IP); // CHANGE THIS TO THE IP OF RECEIVER HOST
 
     int result = sendto(senderSocket, message, strlen(message), 0, (struct sockaddr*)&destAddr, sizeof(destAddr));
