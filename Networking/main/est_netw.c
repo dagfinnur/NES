@@ -14,6 +14,7 @@
 #include "esp_log.h"
 #include "esp_vfs_fat.h"
 #include "driver/sdmmc_host.h"
+#include "driver/gpio.h"
 #include "lwip/inet.h"
 
 #include "nvs.h"
@@ -23,9 +24,13 @@
 #define EXAMPLE_ESP_WIFI_SSID      "Diogo"
 #define EXAMPLE_ESP_WIFI_PASS      "abcdefgh"
 
+#define IP "192.168.1.246"
+
 // Define the RFID & fingerprint system to utilize each message independently
 //#define ESP_RFID_HOST "SOMEVALIDATION OF BEING A RFID"
 //#define ESP_FINGERPRINT_HOST "SOMEVALIDATION OF BEING A FINGERPRINT" 
+
+#define PORT 514
 
 // Additional includes for syslog
 #include <arpa/inet.h>
@@ -33,6 +38,57 @@
 #include <sys/socket.h>
 
 static const char *TAG = "wifi";
+
+#define FINGER_SIZE 100
+#define MAC_ADDRESS_SIZE 18
+#define MAX_AUTH_PEOPLE 10
+
+typedef struct mac_tag {
+    char mac_address[MAC_ADDRESS_SIZE];
+    int tag_number;
+}mac_tag;
+
+typedef struct mac_finger {
+    char mac_address[MAC_ADDRESS_SIZE];
+    char finger[FINGER_SIZE];
+}mac_finger;
+
+static mac_finger finger_list[MAX_AUTH_PEOPLE] = {};
+static mac_tag rfid_list[MAX_AUTH_PEOPLE] = {};
+
+
+bool check_finger_print(char* buffer) {
+    // Convert the string argument to integer
+    strtok(buffer, "-");
+    char* mac_address = strtok(NULL, "-");
+    char* finger = strtok(NULL, "-");
+
+    // Check if the number is in the array
+    for (int i = 0; i < MAX_AUTH_PEOPLE; i++) {
+        if (strcmp(finger_list[i].finger, finger) == 0) {
+            return strcmp(finger_list[i].mac_address, mac_address) != 0;  // COMPARE MAC ADDRESS
+        }
+    }
+
+    return false;  // Number is not in the array
+}
+
+bool check_rfid(char* buffer) {
+    // Convert the string argument to integer
+    
+    char* token = strtok(buffer, "-");
+    char* mac_address = strtok(NULL, "-");
+    int tag = atoi(token);
+
+    // Check if the number is in the array
+    for (int i = 0; i < MAX_AUTH_PEOPLE; i++) {
+        if ((int) rfid_list[i].tag_number == tag) {
+            return strcmp(rfid_list[i].mac_address, mac_address) != 0;  // COMPARE MAC ADDRESS
+        }
+    }
+
+    return false;  // Number is not in the array
+}
 
 // Create a socket and send a syslog message to Host B
 static void sendSyslogMessage(const char* message)
@@ -45,8 +101,8 @@ static void sendSyslogMessage(const char* message)
 
     struct sockaddr_in destAddr;
     destAddr.sin_family = AF_INET;
-    destAddr.sin_port = htons(514); // Specify the communication port for sending syslog messages
-    destAddr.sin_addr.s_addr = inet_addr("192.168.1.246"); // CHANGE THIS TO THE IP OF RECEIVER HOST
+    destAddr.sin_port = htons(PORT); // Specify the communication port for sending syslog messages
+    destAddr.sin_addr.s_addr = inet_addr(IP); // CHANGE THIS TO THE IP OF RECEIVER HOST
 
     int result = sendto(senderSocket, message, strlen(message), 0, (struct sockaddr*)&destAddr, sizeof(destAddr));
     if (result == -1) {
@@ -108,14 +164,16 @@ static void receiveSyslogMessages()
             inet_ntop(AF_INET, &sourceAddr.sin_addr, addrStr, sizeof(addrStr));
             ESP_LOGI(TAG, "Received syslog message: %s from %s", buffer, addrStr);
 
-            // // Here we can parse the message and utilize it as needed for the lock system
-            // if (strstr(buffer, "RFID VALIDATION") != NULL) {
-            //     // Handle RFID VALIDATION
-            //     ESP_LOGI(TAG, "RFID VALIDATION received. Waiting for FINGERPRINT VALIDATION.");
-            // } else if (strstr(buffer, "FINGERPRINT VALIDATION") != NULL) {
-            //     // Handle FINGERPRINT VALIDATION
-            //     ESP_LOGI(TAG, "FINGERPRINT VALIDATION received. Opening lock.");
-            // }
+            // Here we can parse the message and utilize it as needed for the lock system
+            if (strstr(buffer, "rfid") != NULL) {
+                check_rfid(buffer);
+                // Handle RFID VALIDATION
+                ESP_LOGI(TAG, "RFID VALIDATION received. Waiting for FINGERPRINT VALIDATION.");
+            } else if (strstr(buffer, "finger") != NULL) {
+                check_finger_print(buffer);
+                // Handle FINGERPRINT VALIDATION
+                ESP_LOGI(TAG, "FINGERPRINT VALIDATION received. Opening lock.");
+            }
         }
     }
 
@@ -144,7 +202,6 @@ static void connectToANetwork(void)
     esp_event_handler_register(IP_EVENT, IP_EVENT_STA_GOT_IP, &event_handler, NULL);
     esp_wifi_start();
 }
-
 
 // Connect to the network and start listening for syslog messages
 void app_main(void)
