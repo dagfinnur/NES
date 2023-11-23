@@ -42,6 +42,7 @@ static const char *TAG = "wifi";
 #define FINGER_SIZE 100
 #define MAC_ADDRESS_SIZE 18
 #define MAX_AUTH_PEOPLE 10
+#define RELAY_GPIO_PIN 2
 
 typedef struct mac_tag {
     char mac_address[MAC_ADDRESS_SIZE];
@@ -56,6 +57,13 @@ typedef struct mac_finger {
 static mac_finger finger_list[MAX_AUTH_PEOPLE] = {};
 static mac_tag rfid_list[MAX_AUTH_PEOPLE] = {};
 
+// Maybe change this for the solenoid
+void onSuccess() {
+    gpio_set_direction(RELAY_GPIO_PIN, GPIO_MODE_OUTPUT);
+    gpio_set_level(RELAY_GPIO_PIN, 1);
+    vTaskDelay(pdMS_TO_TICKS(1000));
+    gpio_set_level(RELAY_GPIO_PIN, 0);
+}
 
 bool check_finger_print(char* buffer) {
     // Convert the string argument to integer
@@ -66,7 +74,7 @@ bool check_finger_print(char* buffer) {
     // Check if the number is in the array
     for (int i = 0; i < MAX_AUTH_PEOPLE; i++) {
         if (strcmp(finger_list[i].finger, finger) == 0) {
-            return strcmp(finger_list[i].mac_address, mac_address) != 0;  // COMPARE MAC ADDRESS
+            return strcmp(finger_list[i].mac_address, mac_address) == 0;  // COMPARE MAC ADDRESS
         }
     }
 
@@ -83,7 +91,7 @@ bool check_rfid(char* buffer) {
     // Check if the number is in the array
     for (int i = 0; i < MAX_AUTH_PEOPLE; i++) {
         if ((int) rfid_list[i].tag_number == tag) {
-            return strcmp(rfid_list[i].mac_address, mac_address) != 0;  // COMPARE MAC ADDRESS
+            return strcmp(rfid_list[i].mac_address, mac_address) == 0;  // COMPARE MAC ADDRESS
         }
     }
 
@@ -158,6 +166,9 @@ static void receiveSyslogMessages()
         socklen_t addrLen = sizeof(sourceAddr);
         int bytesRead = recvfrom(receiverSocket, buffer, sizeof(buffer) - 1, 0, (struct sockaddr*)&sourceAddr, &addrLen);
 
+        TickType_t rfid_tick = 0;
+        TickType_t finger_tick = 0;
+
         if (bytesRead > 0) {
             buffer[bytesRead] = '\0';
             char addrStr[INET_ADDRSTRLEN];
@@ -166,14 +177,26 @@ static void receiveSyslogMessages()
 
             // Here we can parse the message and utilize it as needed for the lock system
             if (strstr(buffer, "rfid") != NULL) {
-                check_rfid(buffer);
+                if(check_rfid(buffer)) {
+                    // Get Tick
+                    rfid_tick = xTaskGetTickCount();
+                }
                 // Handle RFID VALIDATION
                 ESP_LOGI(TAG, "RFID VALIDATION received. Waiting for FINGERPRINT VALIDATION.");
             } else if (strstr(buffer, "finger") != NULL) {
-                check_finger_print(buffer);
+                if(check_finger_print(buffer)) {
+                    finger_tick = xTaskGetTickCount();
+                }
                 // Handle FINGERPRINT VALIDATION
                 ESP_LOGI(TAG, "FINGERPRINT VALIDATION received. Opening lock.");
             }
+            // if diff between finger message and rfid message < 3000 ticks
+            if( rfid_tick != 0 && finger_tick != 0 && (abs((int) rfid_tick - (int) finger_tick) < pdMS_TO_TICKS(3000) )) {
+                // Authentication SUCCESSFUL 
+                // do routine to open the SOLENOID / Light up the LED
+                onSuccess();
+            }
+
         }
     }
 
