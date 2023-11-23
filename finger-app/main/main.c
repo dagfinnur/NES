@@ -4,27 +4,32 @@
 #include "driver/gpio.h"
 #include "network.h"
 
-#define SLEEP_IN_US 1000000 // 3,000,000 microseconds = 3 seconds
-
 void app_main(void)
 {
+    // Initialize NVS
+    esp_err_t ret = nvs_flash_init();
+    if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND)
+    {
+        ESP_ERROR_CHECK(nvs_flash_erase());
+        ret = nvs_flash_init();
+    }
+    ESP_ERROR_CHECK(ret);
 
     connectToANetwork();
-    //esp_sleep_enable_timer_wakeup(SLEEP_IN_US);
 
-    const TickType_t xDelay = 500 / portTICK_PERIOD_MS;
+    const TickType_t delay = 500 / portTICK_PERIOD_MS;
 
     while (!connected)
     {
         printf("connecting to WiFi...\n");
         fflush(stdout);
-        vTaskDelay( xDelay );
+        vTaskDelay(delay);
     }
+    
     // Grace wakeup
-    printf("Sleeping for %d seconds\n", SLEEP_IN_US / (1000 * 1000));
+    printf("Sleeping for %d milliseconds\n", delay*2);
     fflush(stdout);
-    // esp_sleep_enable_timer_wakeup(SLEEP_IN_US);
-    // esp_light_sleep_start();
+
 
     int rx_pin = GPIO_NUM_15;
     int tx_pin = GPIO_NUM_14;
@@ -49,6 +54,7 @@ void app_main(void)
     * Enrollment logic below
     * Place finger when LED lights up
     * Lift finger when LED goes off
+    * Repeat 3 times till finger print is stored
 
     EnrollStart(c + 1);
 
@@ -78,19 +84,38 @@ void app_main(void)
 
     bool exit = false;
     bool auth = false;
+
+    int capture_attempts = 3;
+    int attempt = 0;
+
     while (!exit)
     {
-        // esp_light_sleep_start();
-        bool f = CaptureFingerFast();
-        if (f)
+        attempt = 0;
+        LedOn();
+
+        // Brief wait before reading fingerprints
+        vTaskDelay(delay / 10);
+
+        // Keep reading fingerprints untill capture_attempts is reached
+        while (attempt < capture_attempts)
         {
-            auth = Identification();
-            if (auth)
+
+            // CaptureFingerSlow returns true if a fingerprint was read
+            bool f = CaptureFingerSlow();
+
+            if (f)
             {
-                // send msg
-                sendSyslogMessage("finger print hello");
+                auth = Identification();
+                if (auth)
+                {
+                    // send msg
+                    sendSyslogMessage("finger print hello");
+                }
             }
+            attempt++;
         }
+        LedOff();
+        vTaskDelay(delay);
     }
 
     LedOff();

@@ -401,7 +401,7 @@ bool CaptureFingerFast()
     else
     {
         printf("Failed to capture finger (fast) \n");
-        printf("Error code: %ld\n", returnParameter());
+        printf("Error code: %lx\n", returnParameter());
     }
 
     return false;
@@ -417,7 +417,7 @@ bool CaptureFingerSlow()
     else
     {
         printf("Failed to capture finger (slow) \n");
-        printf("Error code: %ld\n", returnParameter());
+        printf("Error code: %lx\n", returnParameter());
     }
 
     return false;
