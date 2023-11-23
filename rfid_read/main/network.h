@@ -16,7 +16,7 @@
 #include "driver/sdmmc_host.h"
 #include "lwip/inet.h"
 #include "esp_netif.h"
-#include "lwip/inet.h"
+#include "esp_mac.h"
 
 #include "nvs.h"
 #include "nvs_flash.h"
@@ -26,6 +26,7 @@
 #define EXAMPLE_ESP_WIFI_SSID      "Jesper" /* "Diogo" "Basecamp Resident 2E" "Basecamp Guest" */
 #define EXAMPLE_ESP_WIFI_PASS      "12345677"/* "abcdefgh"  "9SkinSaturdayNoon000" "AVeryGoodPass" */
 #define IP                         "172.20.10.8"
+#define MAC_ADDRESS_SIZE 18
 
 // Define the RFID & fingerprint system to utilize each message independently
 //#define ESP_RFID_HOST "SOMEVALIDATION OF BEING A RFID"
@@ -147,6 +148,20 @@ static void connectToANetwork(void)
     ESP_LOGI(TAG, "esp_wifi_set_ps().");
     esp_wifi_set_ps(WIFI_PS_MIN_MODEM);
     esp_wifi_start();
+}
+
+void disconnectWifi(void) {
+    esp_wifi_disconnect();
+    esp_wifi_stop();
+    esp_wifi_deinit();
+}
+
+void get_mac_address(char* mac_str) {
+    uint8_t mac[6];
+
+    esp_read_mac(mac, ESP_MAC_WIFI_STA);
+    sprintf(mac_str, "%02X:%02X:%02X:%02X:%02X:%02X", mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
+    printf("got mac address: %s", mac_str);
 }
 
 char* getip(char* myip){

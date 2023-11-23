@@ -29,11 +29,15 @@ static int mode = 0; //0 for read; 1 for write
 uint64_t master_tag = 903303070856; //basecamp tag
 /*uint64_t authorized_tags[MAX_TAGS] = 813411536073;*/ //blue rfid original tag
 
+
+
 static void rc522_handler(void* arg, esp_event_base_t base, int32_t event_id, void* event_data)
 {
     rc522_event_data_t* data = (rc522_event_data_t*) event_data;
     char message[64];
     char key[16];
+    char mac_address[MAC_ADDRESS_SIZE];
+    get_mac_address(mac_address);
     switch(event_id) {
         case RC522_EVENT_TAG_SCANNED: {
             rc522_tag_t* tag = (rc522_tag_t*) data->ptr;
@@ -55,7 +59,7 @@ static void rc522_handler(void* arg, esp_event_base_t base, int32_t event_id, vo
             }
             else if (isAuthorized(key)) {
                 printf("AUTHORIZED READ\n");
-                sprintf(message, "%lld\n", tag->serial_number);
+                sprintf(message, "rfid-%s-%lld", mac_address, tag->serial_number);
                 printf("message to send: %s\n", message);
                 sendSyslogMessage(message);
             }
@@ -63,7 +67,7 @@ static void rc522_handler(void* arg, esp_event_base_t base, int32_t event_id, vo
                 printf("UNAUTHORIZED READ\n");
             }         
         }
-        print_nvs_entries();
+        //print_nvs_entries(); NOT WORKING ATM
         break;
     }
 }
