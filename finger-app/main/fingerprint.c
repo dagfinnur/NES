@@ -3,6 +3,8 @@
 uint16_t returnResponseCode();
 uint32_t returnParameter();
 
+// Function to transform a uint32 into an array
+// Result is stored in the array the char pointer, points to
 void int32_to_param(uint32_t value, char *param_arr)
 {
     param_arr[0] = value & 0xff;
@@ -11,14 +13,17 @@ void int32_to_param(uint32_t value, char *param_arr)
     param_arr[3] = (value >> 24) & 0xff;
 }
 
+// Initialize the UART driver
 void init_uart(void)
 {
     QueueHandle_t uart_queue;
     uart_driver_install(UART_NUM_1, RX_BUF_SIZE * 2, 0, 10, &uart_queue, 0);
 }
 
+// Configure the UART by providing a baudrate, RX and TX pin
 void configure_uart(int baudrate, int rx_pin, int tx_pin)
 {
+    // Setup UART to use 8 data bits, no parity bits, and one stop bit (8N1)
     const uart_config_t uart_config = {
         .baud_rate = baudrate,
         .data_bits = UART_DATA_8_BITS,
@@ -32,6 +37,7 @@ void configure_uart(int baudrate, int rx_pin, int tx_pin)
     uart_set_pin(UART_NUM_1, tx_pin, rx_pin, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE);
 }
 
+// Function used for debugging of the command packet
 void print_command()
 {
     printf("Resp start code 1: %02x\n", cmd_buffer[0]);
@@ -69,24 +75,28 @@ void print_response()
     fflush(stdout);
 }
 
+// Function to send a payload using UART
 void write_uart()
 {
-
-    const int len = 12;
+    // This function is only used for sending command payloads
+    const int len = COMMAND_PACKET_LENGTH;
     const int txBytes = uart_write_bytes(UART_NUM_1, cmd_buffer, len);
-    // print_command(data);
-    // printf("*** Sent %d bytes ***\n", txBytes);
     return;
 }
 
+// Function to read data from UART
+// Takes two arguments:
+// bytes: how many bytes to read
+// cursor: where should the read bytes be places in the response buffer
+// Returns the number of bytes read
 int16_t read_uart(uint16_t bytes, uint32_t cursor)
 {
     const int rxBytes = uart_read_bytes(UART_NUM_1, (resp_buffer + cursor), bytes, (100));
-    // printf("### Read %d bytes ###\n", rxBytes);
 
     return (uint16_t)rxBytes;
 }
 
+// Checksum is calculated by summartion of the packet bytes
 uint16_t Checksum(char *packet, int packet_len)
 {
     uint16_t sum = 0;
@@ -99,18 +109,21 @@ uint16_t Checksum(char *packet, int packet_len)
     return sum;
 };
 
+// Allocate the space for the command and response buffers
 void InitFingerprint(void)
 {
     cmd_buffer = (char *)malloc(COMMAND_PACKET_LENGTH * sizeof(char));
     resp_buffer = (char *)malloc(((RX_BUF_SIZE * 2) + 1) * sizeof(char));
 };
 
+// Free the allocated space
 void ExitFingerprint(void)
 {
     free(cmd_buffer);
     free(resp_buffer);
 };
 
+// Construct a Command packet given the parameters and command
 void ConstructCommandPacket(uint32_t param, uint16_t cmd)
 {
     cmd_buffer[0] = COMMAND_START_CODE_1;
@@ -126,6 +139,7 @@ void ConstructCommandPacket(uint32_t param, uint16_t cmd)
     cmd_buffer[5] = param_arr[1];
     cmd_buffer[6] = param_arr[2];
     cmd_buffer[7] = param_arr[3];
+    // We don't need the param array any more, so free it
     free(param_arr);
 
     cmd_buffer[8] = cmd & 0xff;
@@ -139,6 +153,7 @@ void ConstructCommandPacket(uint32_t param, uint16_t cmd)
     return;
 };
 
+// Function that combines the construction, sending and receiving of a Command packet
 void SendCommand(uint32_t params, char cmd)
 {
     ConstructCommandPacket(params, cmd);
@@ -150,6 +165,7 @@ void SendCommand(uint32_t params, char cmd)
     ReadResponse(COMMAND_PACKET_LENGTH);
 }
 
+// Function to handle the reading of a reponse packet
 void ReadResponse(uint32_t bytes)
 {
     int16_t bytesRead = read_uart(bytes, 0);
@@ -182,104 +198,46 @@ void ReadResponse(uint32_t bytes)
     }
 }
 
-void ReadDataUsingBuffer()
-{
-    int length = 0;
-    ESP_ERROR_CHECK(uart_get_buffered_data_len(UART_NUM_1, (size_t *)&length));
-    printf("Initial rxbuffer: %d\n", length);
-    fflush(stdout);
-    while (length > 0)
-    {
-        fflush(stdout);
-        int bytes_read = read_uart(length, 0);
-        if (bytes_read < length)
-        {
-            printf("FUCK\n");
-            fflush(stdout);
-        }
-        // else
-        // {
-        //     for (int16_t i = 0; i < bytes_read; i++)
-        //     {
-        //         printf("0x%02x ", resp_buffer[i]);
-        //     }
-        // }
-        ESP_ERROR_CHECK(uart_get_buffered_data_len(UART_NUM_1, (size_t *)&length));
-        printf("new rxbuffer: %d\n", length);
-        fflush(stdout);
-    }
-    // printf("rxbuffer: %d\n", length);
-    // fflush(stdout);
-    // int bytes_read = read_uart(length);
-    // if (bytes_read < length)
-    // {
-    //     printf("FUCK\n");
-    //     fflush(stdout);
-    // }
-    // else
-    // {
-    //     for (int16_t i = 0; i < bytes_read; i++)
-    //     {
-    //         printf("0x%02x ", resp_buffer[i]);
-    //     }
-    // }
-}
-
+// Wrapper for the read_uart
 void ReadData(uint16_t size, char cursor)
 {
-    // // Split the read into smaller reads of sizes of 1024 bytes
-    // uint16_t read_size = RX_BUF_SIZE;
-    // uint16_t number_of_reads = size / read_size;
-    // uint16_t remaining_bytes = size - (read_size * number_of_reads);
-    // int16_t bytes_read;
-
-    // for (int i = 0; i < number_of_reads; i++)
-    // {
-    //     bytes_read = read_uart(read_size);
-    //     if (bytes_read != read_size)
-    //     {
-    //         printf("ah shit read %d \n", bytes_read);
-    //         fflush(stdout);
-    //         return;
-    //     }
-    //     for (int16_t k = 0; k < bytes_read; k++)
-    //     {
-    //         printf("0x%02x ", resp_buffer[k]);
-    //     }
-    // }
-
-    // if (remaining_bytes > 0)
-    // {
-    //     bytes_read = read_uart(read_size);
-    //     if (bytes_read != remaining_bytes)
-    //     {
-    //         printf("ah shit read %d \n", bytes_read);
-    //         fflush(stdout);
-    //         return;
-    //     }
-    //     for (int16_t k = 0; k < bytes_read; k++)
-    //     {
-    //         printf("0x%02x ", resp_buffer[k]);
-    //     }
-    // }
-
     int16_t bytes_read = read_uart(size, cursor);
     if (bytes_read < size)
     {
-        printf("FUCK\n");
-        fflush(stdout);
+        printf("Number of bytes read does not match expectation: expected: %d, read: %d\n", size, bytes_read);
     }
-    // else
-    // {
-    //     for (int16_t i = 0; i < bytes_read; i++)
-    //     {
-    //         printf("0x%02x ", resp_buffer[i]);
-    //     }
-    // }
 
-    printf("\n");
     fflush(stdout);
 }
+
+// Return the parameter from the response array as a uint32
+uint32_t returnParameter()
+{
+    uint32_t param = 0;
+    for (int i = 0; i < 4; i++)
+    {
+        param += resp_buffer[4 + i] << (8 * i);
+    }
+    return param;
+}
+
+// Return the reponse code of the reponse array
+uint16_t returnResponseCode()
+{
+    return ((resp_buffer[9] << 8)) + resp_buffer[8];
+}
+
+
+void get_sha256_of_template(uint8_t *output) {
+    esp_sha_type_t sha_type = ESP_SHA_SHA256;
+    esp_sha_handle_t sha_handle;
+
+    esp_sha_start(sha_type, &sha_handle);
+    esp_sha_update(sha_handle, (const uint8_t *)resp_buffer, TEMPLATE_SIZE_BYTES);
+    esp_sha_finish(sha_handle, output);
+}
+
+// GT511C3 specific functions below
 
 void Open(void)
 {
@@ -386,8 +344,7 @@ void GetTemplate(uint8_t id)
     {
         printf("ok\n");
         fflush(stdout);
-        ReadData(498, 0);
-        // ReadDataUsingBuffer();
+        ReadData(TEMPLATE_SIZE_BYTES, 0);
     }
 }
 
@@ -423,13 +380,14 @@ bool CaptureFingerSlow()
     return false;
 }
 
-bool Identification()
+bool Identification(uint8_t* id)
 {
     bool id_ok = false;
     SendCommand(0x00, CMD_IDENTIFY);
     if (returnResponseCode() == CMD_ACK)
     {
-        printf("Indentified finger with ID: %ld\n", returnParameter());
+        id = (uint8_t)returnParameter();
+        printf("Indentified finger with ID: %ld\n", id);
         return true;
     }
     else
@@ -454,12 +412,16 @@ bool IsFingerPressed()
             printf("Finger is pressed\n");
             pressed = true;
             return pressed;
-        } else {
+        }
+        else
+        {
             printf("Finger is not pressed\n");
             pressed = false;
             return pressed;
         }
-    } else {
+    }
+    else
+    {
         printf("Failed to get FingerPressed\n");
     }
 
@@ -502,6 +464,7 @@ void EnrollSecond()
     }
     fflush(stdout);
 }
+
 void EnrollThird()
 {
     SendCommand(0x00, CMD_ENROLL_THIRD);
@@ -533,18 +496,4 @@ void Enroll(uint8_t num)
         EnrollThird();
         return;
     }
-}
-uint32_t returnParameter()
-{
-    uint32_t param = 0;
-    for (int i = 0; i < 4; i++)
-    {
-        param += resp_buffer[4 + i] << (8 * i);
-    }
-    return param;
-}
-
-uint16_t returnResponseCode()
-{
-    return ((resp_buffer[9] << 8)) + resp_buffer[8];
 }

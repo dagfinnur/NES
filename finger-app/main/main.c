@@ -6,6 +6,8 @@
 
 void app_main(void)
 {
+    char message[64];
+
     char mac_address[MAC_ADDRESS_SIZE];
     get_mac_address(mac_address);
 
@@ -18,8 +20,10 @@ void app_main(void)
     }
     ESP_ERROR_CHECK(ret);
 
+    // Connect to the access point
     connectToANetwork();
 
+    // Define a wait delay of 500 milliseconds
     const TickType_t delay = 500 / portTICK_PERIOD_MS;
 
     while (!connected)
@@ -29,7 +33,7 @@ void app_main(void)
         vTaskDelay(delay);
     }
     
-    // Grace wakeup
+    // Grace startup
     printf("Sleeping for %ld milliseconds\n", delay*2);
     fflush(stdout);
 
@@ -45,6 +49,7 @@ void app_main(void)
 
     Open();
 
+    // Change the baudrate to allow for faster communication
     int new_baud = 57600;
     ChangeBaudrate(new_baud);
     configure_uart(new_baud, rx_pin, tx_pin);
@@ -83,10 +88,9 @@ void app_main(void)
     c = GetEnrolledCount();
     */
 
-    //  LedOn();
-
     bool exit = false;
     bool auth = false;
+    uint8_t auth_id;
 
     int capture_attempts = 3;
     int attempt = 0;
@@ -108,11 +112,17 @@ void app_main(void)
 
             if (f)
             {
-                auth = Identification();
+                auth = Identification(&auth_id);
                 if (auth)
                 {
+                    // Get the template of the matching the authenticated finger
+                    GetTemplate(id);  
+
+                    // Now that the template is loaded, get the SHA256 of it
+                    uint8_t hash = get_sha256_of_template(id);
+                    sprintf(message, "finger-%s-%d", mac_address, hash);
                     // send msg
-                    sendSyslogMessage("finger print hello");
+                    sendSyslogMessage(message);
                 }
             }
             attempt++;

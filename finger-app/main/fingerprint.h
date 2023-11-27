@@ -12,7 +12,7 @@ Command and error codes found in the GT-511C3 data sheet v2.1 (04/11/2016)
 
 // Packet sizes
 const uint16_t LARGEST_DATA_PACKET_BYTES = 52216;
-
+const char TEMPLATE_SIZE_BYTES = 498;
 const char COMMAND_PACKET_LENGTH = 12;
 // Command packet information
 const char COMMAND_START_CODE_1 = 0x55;
@@ -97,6 +97,8 @@ void write_uart();
 // If no response code was read, returns -1
 // Takes a pointer to a char array, and a int of expected bytes to read
 int16_t read_uart(uint16_t bytes, uint32_t cursor);
+
+void get_sha256(const char *data, size_t length, uint8_t *output);
 
 // Finger scanner functions
 uint16_t Checksum(char *packet, int len);
