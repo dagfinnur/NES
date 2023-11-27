@@ -21,8 +21,8 @@
 #include "nvs_flash.h"
 
 // Define SSID and PSK
-#define EXAMPLE_ESP_WIFI_SSID      "Diogo"
-#define EXAMPLE_ESP_WIFI_PASS      "abcdefgh"
+#define EXAMPLE_ESP_WIFI_SSID      "Jesper"
+#define EXAMPLE_ESP_WIFI_PASS      "12345677"
 
 #define IP "192.168.1.246"
 
@@ -46,7 +46,7 @@ static const char *TAG = "wifi";
 
 typedef struct mac_tag {
     char mac_address[MAC_ADDRESS_SIZE];
-    int tag_number;
+    uint64_t tag_number;
 }mac_tag;
 
 typedef struct mac_finger {
@@ -57,6 +57,7 @@ typedef struct mac_finger {
 static mac_finger finger_list[MAX_AUTH_PEOPLE] = {};
 static mac_tag rfid_list[MAX_AUTH_PEOPLE] = {};
 
+
 // Maybe change this for the solenoid
 void onSuccess() {
     gpio_set_direction(RELAY_GPIO_PIN, GPIO_MODE_OUTPUT);
@@ -66,31 +67,56 @@ void onSuccess() {
 }
 
 bool check_finger_print(char* buffer) {
-    // Convert the string argument to integer
-    strtok(buffer, "-");
-    char* mac_address = strtok(NULL, "-");
-    char* finger = strtok(NULL, "-");
+   // Variables to store the divided parts
+    char token[7]; // Assuming a maximum token length of 6
+    char mac_address[MAC_ADDRESS_SIZE];
+    char finger[255];
+
+    // Use sscanf to parse the string
+    if (sscanf(buffer, "%[^-]-%[^-]-%[^-]", token, mac_address, finger) == 3) {
+        // Print the results
+        ESP_LOGI(TAG, "First String: %s\n", token);
+        ESP_LOGI(TAG, "Second String: %s\n", mac_address);
+        ESP_LOGI(TAG, "Last string: %s\n ", finger);
+    } else {
+        // Parsing failed
+        printf("Error parsing the string.\n");
+    }
 
     // Check if the number is in the array
     for (int i = 0; i < MAX_AUTH_PEOPLE; i++) {
         if (strcmp(finger_list[i].finger, finger) == 0) {
+            ESP_LOGI(TAG, "FINGER OK, checking MAC");
+            ESP_LOGI(TAG, "mac from list: %s | mac from message %s ", finger_list[i].mac_address, mac_address);
             return strcmp(finger_list[i].mac_address, mac_address) == 0;  // COMPARE MAC ADDRESS
         }
     }
-
-    return false;  // Number is not in the array
+    
+    return false;
 }
 
 bool check_rfid(char* buffer) {
-    // Convert the string argument to integer
-    
-    char* token = strtok(buffer, "-");
-    char* mac_address = strtok(NULL, "-");
-    int tag = atoi(token);
+    // Variables to store the divided parts
+    char token[6]; // Assuming a maximum token length of 6
+    char mac_address[MAC_ADDRESS_SIZE];
+    uint64_t tag;
+
+    // Use sscanf to parse the string
+    if (sscanf(buffer, "%[^-]-%[^-]-%" SCNu64, token, mac_address, &tag) == 3) {
+        // Print the results
+        ESP_LOGI(TAG, "First String: %s\n", token);
+        ESP_LOGI(TAG, "Second String: %s\n", mac_address);
+        ESP_LOGI(TAG, "Number: %" PRIu64 "\n", tag);
+    } else {
+        // Parsing failed
+        printf("Error parsing the string.\n");
+    }
 
     // Check if the number is in the array
     for (int i = 0; i < MAX_AUTH_PEOPLE; i++) {
-        if ((int) rfid_list[i].tag_number == tag) {
+        if (rfid_list[i].tag_number == tag) {
+            ESP_LOGI(TAG, "TAG OK, checking MAC");
+            ESP_LOGI(TAG, "mac from list: %s | mac from message %s ", rfid_list[i].mac_address, mac_address);
             return strcmp(rfid_list[i].mac_address, mac_address) == 0;  // COMPARE MAC ADDRESS
         }
     }
@@ -160,14 +186,14 @@ static void receiveSyslogMessages()
 
     char buffer[1024]; // Adjust the buffer size as needed... not sure what the max size is, just picked 1024 for now
     //char buffer[65535]; // Maximum buffer size for UDP packets
+    TickType_t rfid_tick = 0;
+    TickType_t finger_tick = 0;
 
     while (1) {
         struct sockaddr_in sourceAddr;
         socklen_t addrLen = sizeof(sourceAddr);
         int bytesRead = recvfrom(receiverSocket, buffer, sizeof(buffer) - 1, 0, (struct sockaddr*)&sourceAddr, &addrLen);
 
-        TickType_t rfid_tick = 0;
-        TickType_t finger_tick = 0;
 
         if (bytesRead > 0) {
             buffer[bytesRead] = '\0';
@@ -177,26 +203,39 @@ static void receiveSyslogMessages()
 
             // Here we can parse the message and utilize it as needed for the lock system
             if (strstr(buffer, "rfid") != NULL) {
+                // Handle RFID VALIDATION
                 if(check_rfid(buffer)) {
                     // Get Tick
                     rfid_tick = xTaskGetTickCount();
+                    ESP_LOGI(TAG, "RFID VALIDATION success.");
+                } else {
+                    rfid_tick = 0;
+                    ESP_LOGI(TAG, "RFID VALIDATION failed.");
                 }
-                // Handle RFID VALIDATION
-                ESP_LOGI(TAG, "RFID VALIDATION received. Waiting for FINGERPRINT VALIDATION.");
             } else if (strstr(buffer, "finger") != NULL) {
+                // Handle FINGERPRINT VALIDATION
                 if(check_finger_print(buffer)) {
                     finger_tick = xTaskGetTickCount();
+                    ESP_LOGI(TAG, "FINGERPRINT VALIDATION sucess.");
+                } else {
+                    finger_tick = 0;
+                    ESP_LOGI(TAG, "FINGERPRINT VALIDATION failed");
                 }
-                // Handle FINGERPRINT VALIDATION
-                ESP_LOGI(TAG, "FINGERPRINT VALIDATION received. Opening lock.");
             }
             // if diff between finger message and rfid message < 3000 ticks
-            if( rfid_tick != 0 && finger_tick != 0 && (abs((int) rfid_tick - (int) finger_tick) < pdMS_TO_TICKS(3000) )) {
+            if( rfid_tick != 0 && finger_tick != 0) {
+                ESP_LOGI(TAG, "TICK NON ZERO");
+                if (abs((int) rfid_tick - (int) finger_tick) < pdMS_TO_TICKS(3000) ) {
                 // Authentication SUCCESSFUL 
                 // do routine to open the SOLENOID / Light up the LED
+                ESP_LOGI(TAG, "Unlocking");
                 onSuccess();
+                } else {
+                    ESP_LOGI(TAG, "More than 3 seconds between authentications. Still Locked");
+                }
+            } else {
+                ESP_LOGI(TAG, "Missing one authentication factor. Still locked");
             }
-
         }
     }
 
@@ -237,6 +276,16 @@ void app_main(void)
     }
     ESP_ERROR_CHECK( ret );
     connectToANetwork();
+
+    mac_tag tag = {};
+    strcpy(tag.mac_address, "70:B8:F6:12:BD:64");
+    tag.tag_number = 585971602005;
+    rfid_list[0] = tag;
+
+    mac_finger finger = {};
+    strcpy(finger.mac_address, "70:B8:F6:12:BD:64");
+    strcpy(finger.finger, "finger");
+    finger_list[0] = finger;
 
 
     // Sending syslog message to internal host

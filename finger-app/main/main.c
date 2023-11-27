@@ -6,6 +6,9 @@
 
 void app_main(void)
 {
+    char mac_address[MAC_ADDRESS_SIZE];
+    get_mac_address(mac_address);
+
     // Initialize NVS
     esp_err_t ret = nvs_flash_init();
     if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND)
@@ -27,7 +30,7 @@ void app_main(void)
     }
     
     // Grace wakeup
-    printf("Sleeping for %d milliseconds\n", delay*2);
+    printf("Sleeping for %ld milliseconds\n", delay*2);
     fflush(stdout);
 
 
@@ -80,7 +83,7 @@ void app_main(void)
     c = GetEnrolledCount();
     */
 
-    LedOn();
+    //  LedOn();
 
     bool exit = false;
     bool auth = false;

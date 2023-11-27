@@ -15,17 +15,20 @@
 #include "esp_vfs_fat.h"
 #include "driver/sdmmc_host.h"
 #include "lwip/inet.h"
+#include "esp_netif.h"
+#include "esp_mac.h"
 
 #include "nvs.h"
 #include "nvs_flash.h"
 
 // Define SSID and PSK
-#define EXAMPLE_ESP_WIFI_SSID      "Jesper" //"Diogo"
-#define EXAMPLE_ESP_WIFI_PASS      "12345677"// "abcdefgh"
+#define EXAMPLE_ESP_WIFI_SSID      "Jesper" /* "Diogo" "Basecamp Resident 2E" "Basecamp Guest" */
+#define EXAMPLE_ESP_WIFI_PASS      "12345677"/* "abcdefgh"  "9SkinSaturdayNoon000" "AVeryGoodPass" */
+#define MAC_ADDRESS_SIZE 18
 
 // Define the RFID & fingerprint system to utilize each message independently
 //#define ESP_RFID_HOST "SOMEVALIDATION OF BEING A RFID"
-//#define ESP_FINGERPRINT_HOST "SOMEVALIDATION OF BEING A FINGERPRINT" 
+//#define ESP_FINGERPRINT_HOST "SOMEVALIDATION OF BEING A FINGERPRINT"
 
 // Additional includes for syslog
 #include <arpa/inet.h>
@@ -66,16 +69,16 @@ static void event_handler(void* arg, esp_event_base_t event_base,
                           int32_t event_id, void* event_data)
 {
     if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_STA_START) {
-        ESP_LOGI(TAG, "sta start");
+ESP_LOGI(TAG, "sta start");
         esp_wifi_connect();
     } else if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_STA_DISCONNECTED) {
-        ESP_LOGI(TAG, "sta disc");
+ESP_LOGI(TAG, "sta disc");
         esp_wifi_connect();
-        connected = false;
+connected = false;
     } else if (event_base == IP_EVENT && event_id == IP_EVENT_STA_GOT_IP) {
         ip_event_got_ip_t* event = (ip_event_got_ip_t*) event_data;
         ESP_LOGI(TAG, "got ip:%s", ip4addr_ntoa(&event->ip_info.ip));
-        connected = true;
+    connected = true;
     }
 }
 
@@ -138,34 +141,32 @@ static void connectToANetwork(void)
     esp_wifi_set_config(WIFI_IF_STA, &wifi_config);
     esp_event_handler_register(WIFI_EVENT, ESP_EVENT_ANY_ID, &event_handler, NULL);
     esp_event_handler_register(IP_EVENT, IP_EVENT_STA_GOT_IP, &event_handler, NULL);
-
     // Set Power Save to Minium
-    // ESP_LOGI(TAG, "esp_wifi_set_ps().");
-    // esp_wifi_set_ps(WIFI_PS_NONE);
-    
+    ESP_LOGI(TAG, "esp_wifi_set_ps().");
+    esp_wifi_set_ps(WIFI_PS_MIN_MODEM);
     esp_wifi_start();
 }
 
-    ///////////////////////////////////////////////////////////////////////////////////////////////////
-
-/*
-// Connect to the network and start listening for syslog messages
-void app_main(void)
-{
-
-    // Initialize NVS
-    esp_err_t ret = nvs_flash_init();
-    if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND) {
-        ESP_ERROR_CHECK(nvs_flash_erase());
-        ret = nvs_flash_init();
-    }
-    ESP_ERROR_CHECK( ret );
-    connectToANetwork();
-
-    // Sending syslog message to internal host
-    //sendSyslogMessage("Greetings from ESP32!"); // send RFID or fingerprint data instead here
-
-    // Receiving syslog messages from external host
-    receiveSyslogMessages();
+void disconnectWifi(void) {
+    esp_wifi_disconnect();
+    esp_wifi_stop();
+    esp_wifi_deinit();
 }
-*/
+
+void get_mac_address(char* mac_str) {
+    uint8_t mac[6];
+
+    esp_read_mac(mac, ESP_MAC_WIFI_STA);
+    sprintf(mac_str, "%02X:%02X:%02X:%02X:%02X:%02X", mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
+    printf("got mac address: %s", mac_str);
+}
+
+char* getip(char* myip){
+    // IP address.
+    esp_netif_ip_info_t ip_info;
+    esp_netif_t *netif = netif_get_by_index(ESP_IF_WIFI_STA);
+    esp_netif_get_ip_info(netif, &ip_info);
+    printf("My IP: " IPSTR "\n", IP2STR(&ip_info.ip));
+    sprintf(myip, IPSTR, IP2STR(&ip_info.ip));
+    return myip;
+}
