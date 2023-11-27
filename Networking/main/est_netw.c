@@ -16,6 +16,7 @@
 #include "driver/sdmmc_host.h"
 #include "driver/gpio.h"
 #include "lwip/inet.h"
+#include "lwip/ip4_addr.h"
 
 #include "nvs.h"
 #include "nvs_flash.h"
@@ -80,7 +81,7 @@ bool check_finger_print(char* buffer) {
         ESP_LOGI(TAG, "Last string: %s\n ", finger);
     } else {
         // Parsing failed
-        printf("Error parsing the string.\n");
+        printf("Error parsing the string: %s.\n", buffer);
     }
 
     // Check if the number is in the array
@@ -158,7 +159,9 @@ static void event_handler(void* arg, esp_event_base_t event_base,
         esp_wifi_connect();
     } else if (event_base == IP_EVENT && event_id == IP_EVENT_STA_GOT_IP) {
         ip_event_got_ip_t* event = (ip_event_got_ip_t*) event_data;
-        ESP_LOGI(TAG, "got ip:%s", ip4addr_ntoa(&event->ip_info.ip));
+        ip4_addr_t addr;
+        memcpy(&addr, &event->ip_info.ip, sizeof(ip4_addr_t));
+        ESP_LOGI(TAG, "got ip: %s", ip4addr_ntoa(&addr));
     
     }
 }
