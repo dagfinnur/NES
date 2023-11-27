@@ -40,16 +40,18 @@
 
 static const char *TAG = "wifi";
 
-#define FINGER_SIZE 100
+#define FINGER_SIZE 64
 #define MAC_ADDRESS_SIZE 18
 #define MAX_AUTH_PEOPLE 10
-#define RELAY_GPIO_PIN 2
+#define LOCK_GPIO_PIN 2
 
+// Struct of the authorized pairs of {mac_address, tag}
 typedef struct mac_tag {
     char mac_address[MAC_ADDRESS_SIZE];
     uint64_t tag_number;
 }mac_tag;
 
+// Struct of the authorized pairs of {mac_address, finger}
 typedef struct mac_finger {
     char mac_address[MAC_ADDRESS_SIZE];
     char finger[FINGER_SIZE];
@@ -59,19 +61,19 @@ static mac_finger finger_list[MAX_AUTH_PEOPLE] = {};
 static mac_tag rfid_list[MAX_AUTH_PEOPLE] = {};
 
 
-// Maybe change this for the solenoid
+// Function to activate the predefined lock PIN for 1 second
 void onSuccess() {
-    gpio_set_direction(RELAY_GPIO_PIN, GPIO_MODE_OUTPUT);
-    gpio_set_level(RELAY_GPIO_PIN, 1);
+    gpio_set_direction(LOCK_GPIO_PIN, GPIO_MODE_OUTPUT);
+    gpio_set_level(LOCK_GPIO_PIN, 1);
     vTaskDelay(pdMS_TO_TICKS(1000));
-    gpio_set_level(RELAY_GPIO_PIN, 0);
+    gpio_set_level(LOCK_GPIO_PIN, 0);
 }
 
 bool check_finger_print(char* buffer) {
    // Variables to store the divided parts
     char token[7]; // Assuming a maximum token length of 6
     char mac_address[MAC_ADDRESS_SIZE];
-    char finger[255];
+    char finger[FINGER_SIZE];
 
     // Use sscanf to parse the string
     if (sscanf(buffer, "%[^-]-%[^-]-%[^-]", token, mac_address, finger) == 3) {
@@ -84,16 +86,16 @@ bool check_finger_print(char* buffer) {
         printf("Error parsing the string: %s.\n", buffer);
     }
 
-    // Check if the number is in the array
+    // Check if the {finger, mac_address} pair is in the array
     for (int i = 0; i < MAX_AUTH_PEOPLE; i++) {
-        if (strcmp(finger_list[i].finger, finger) == 0) {
+        if (strcmp(finger_list[i].finger, finger) == 0) { // Check if the Finger is there first
             ESP_LOGI(TAG, "FINGER OK, checking MAC");
             ESP_LOGI(TAG, "mac from list: %s | mac from message %s ", finger_list[i].mac_address, mac_address);
             return strcmp(finger_list[i].mac_address, mac_address) == 0;  // COMPARE MAC ADDRESS
         }
     }
-    
-    return false;
+
+    return false; // {finger, mac_address} is not in the 
 }
 
 bool check_rfid(char* buffer) {
@@ -115,7 +117,7 @@ bool check_rfid(char* buffer) {
 
     // Check if the number is in the array
     for (int i = 0; i < MAX_AUTH_PEOPLE; i++) {
-        if (rfid_list[i].tag_number == tag) {
+        if (rfid_list[i].tag_number == tag) { // Check if the Tag is there first
             ESP_LOGI(TAG, "TAG OK, checking MAC");
             ESP_LOGI(TAG, "mac from list: %s | mac from message %s ", rfid_list[i].mac_address, mac_address);
             return strcmp(rfid_list[i].mac_address, mac_address) == 0;  // COMPARE MAC ADDRESS
@@ -149,7 +151,7 @@ static void sendSyslogMessage(const char* message)
     close(senderSocket);
 }
 
-
+// Function to stay connected to WIFI and when connected send IP
 static void event_handler(void* arg, esp_event_base_t event_base,
                           int32_t event_id, void* event_data)
 {
@@ -195,8 +197,9 @@ static void receiveSyslogMessages()
     while (1) {
         struct sockaddr_in sourceAddr;
         socklen_t addrLen = sizeof(sourceAddr);
-        int bytesRead = recvfrom(receiverSocket, buffer, sizeof(buffer) - 1, 0, (struct sockaddr*)&sourceAddr, &addrLen);
 
+        // recieve message
+        int bytesRead = recvfrom(receiverSocket, buffer, sizeof(buffer) - 1, 0, (struct sockaddr*)&sourceAddr, &addrLen);
 
         if (bytesRead > 0) {
             buffer[bytesRead] = '\0';
@@ -245,15 +248,17 @@ static void receiveSyslogMessages()
     close(receiverSocket);
 }
 
-// connect to the network
+// Connect to the Predefined network
 static void connectToANetwork(void)
 {
     esp_netif_init();
     esp_event_loop_create_default();
     esp_netif_create_default_wifi_sta();
+
     wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
     esp_wifi_init(&cfg);
     esp_wifi_set_storage(WIFI_STORAGE_RAM);
+
     wifi_config_t wifi_config = {
         .sta = {
             .ssid = EXAMPLE_ESP_WIFI_SSID,
@@ -261,8 +266,10 @@ static void connectToANetwork(void)
         },
     };
     ESP_LOGI(TAG, "Setting WiFi configuration SSID %s...", wifi_config.sta.ssid);
+
     esp_wifi_set_mode(WIFI_MODE_STA);
     esp_wifi_set_config(WIFI_IF_STA, &wifi_config);
+
     esp_event_handler_register(WIFI_EVENT, ESP_EVENT_ANY_ID, &event_handler, NULL);
     esp_event_handler_register(IP_EVENT, IP_EVENT_STA_GOT_IP, &event_handler, NULL);
     esp_wifi_start();
@@ -277,22 +284,8 @@ void app_main(void)
         ESP_ERROR_CHECK(nvs_flash_erase());
         ret = nvs_flash_init();
     }
-    ESP_ERROR_CHECK( ret );
+    ESP_ERROR_CHECK(ret);
     connectToANetwork();
-
-    mac_tag tag = {};
-    strcpy(tag.mac_address, "70:B8:F6:12:BD:64");
-    tag.tag_number = 585971602005;
-    rfid_list[0] = tag;
-
-    mac_finger finger = {};
-    strcpy(finger.mac_address, "70:B8:F6:12:BD:64");
-    strcpy(finger.finger, "finger");
-    finger_list[0] = finger;
-
-
-    // Sending syslog message to internal host
-    //sendSyslogMessage("Greetings from ESP32!"); // send RFID or fingerprint data instead here
 
     // Receiving syslog messages from external host
     receiveSyslogMessages();
