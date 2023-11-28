@@ -25,20 +25,28 @@
 
 static const char* TAG1 = "rc522-demo";
 static rc522_handle_t scanner;
+
+// NVS Read / Write Mode
 static int mode = 0; //0 for read; 1 for write
-uint64_t master_tag = 903303070856; //basecamp tag
-/*uint64_t authorized_tags[MAX_TAGS] = 813411536073;*/ //blue rfid original tag
 
+//Hardcoded Master Tag
+uint64_t master_tag = 903303070856; 
 
-
+// Event Handler for reading a Tag
 static void rc522_handler(void* arg, esp_event_base_t base, int32_t event_id, void* event_data)
 {
+
     rc522_event_data_t* data = (rc522_event_data_t*) event_data;
     char message[64];
     char key[16];
     char mac_address[MAC_ADDRESS_SIZE];
+    
+    // Retrieving MAC Address from Controller and assigning it to mac_address variable
     get_mac_address(mac_address);
+    
+
     switch(event_id) {
+        // TAG_SCANNED is the only covered event
         case RC522_EVENT_TAG_SCANNED: {
             rc522_tag_t* tag = (rc522_tag_t*) data->ptr;
             ESP_LOGI(TAG1, "Tag scanned (sn: %" PRIu64 ")", tag->serial_number);
@@ -72,8 +80,9 @@ static void rc522_handler(void* arg, esp_event_base_t base, int32_t event_id, vo
     }
 }
 
-void rfid_read(void) {
-    //RFID SETUP
+// RFID Event Scanner Initializer
+void rfid_read() {
+    //RFID PIN SETUP
     rc522_config_t config = {
         .spi.host = VSPI_HOST,
         .spi.miso_gpio = 35,
@@ -88,8 +97,11 @@ void rfid_read(void) {
     rc522_start(scanner);
 }
 
-void app_main() {    
+void app_main() {
+
     init_nvs();
+
     connectToANetwork();
+
     rfid_read();
 }

@@ -124,7 +124,7 @@ static void receiveSyslogMessages()
     close(receiverSocket);
 }
 
-// connect to the network
+// Connect to a predefined Network
 static void connectToANetwork(void)
 {
     esp_netif_init();
@@ -150,26 +150,18 @@ static void connectToANetwork(void)
     esp_wifi_start();
 }
 
+// Disconnect from a WiFi Network
 void disconnectWifi(void) {
     esp_wifi_disconnect();
     esp_wifi_stop();
     esp_wifi_deinit();
 }
 
+// Function to get MAC Address from Controller
 void get_mac_address(char* mac_str) {
     uint8_t mac[6];
 
     esp_read_mac(mac, ESP_MAC_WIFI_STA);
     sprintf(mac_str, "%02X:%02X:%02X:%02X:%02X:%02X", mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
     printf("got mac address: %s", mac_str);
-}
-
-char* getip(char* myip){
-    // IP address.
-    esp_netif_ip_info_t ip_info;
-    esp_netif_t *netif = netif_get_by_index(ESP_IF_WIFI_STA);
-    esp_netif_get_ip_info(netif, &ip_info);
-    printf("My IP: " IPSTR "\n", IP2STR(&ip_info.ip));
-    sprintf(myip, IPSTR, IP2STR(&ip_info.ip));
-    return myip;
 }
