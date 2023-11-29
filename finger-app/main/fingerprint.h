@@ -5,6 +5,9 @@
 #include <string.h>
 #include "driver/uart.h"
 #include "esp_sleep.h"
+#include "esp_ota_ops.h"
+#include "esp_partition.h"
+#include "mbedtls/sha256.h"
 
 /*
 Command and error codes found in the GT-511C3 data sheet v2.1 (04/11/2016)
@@ -12,7 +15,7 @@ Command and error codes found in the GT-511C3 data sheet v2.1 (04/11/2016)
 
 // Packet sizes
 const uint16_t LARGEST_DATA_PACKET_BYTES = 52216;
-const char TEMPLATE_SIZE_BYTES = 498;
+const uint16_t TEMPLATE_SIZE_BYTES = 498;
 const char COMMAND_PACKET_LENGTH = 12;
 // Command packet information
 const char COMMAND_START_CODE_1 = 0x55;
@@ -75,7 +78,6 @@ const uint16_t NACK_FINGER_IS_NOT_PRESSED = 0x1012;
 
 // UART
 static const int RX_BUF_SIZE = 1024;
-int TIME_PER_BYTE_MS = 20;
 
 // Fingerprint
 char *cmd_buffer;
@@ -119,9 +121,10 @@ void GetRawImage(void);
 void GetTemplate(uint8_t id);
 bool CaptureFingerFast();
 bool CaptureFingerSlow();
-bool Identification();
+bool Identification(uint8_t*);
 bool IsFingerPressed();
 void Enroll(uint8_t num);
 void ChangeBaudrate(uint32_t baudrate);
+void DeleteAll();
 
 #endif

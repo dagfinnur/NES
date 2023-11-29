@@ -162,7 +162,14 @@ void SendCommand(uint32_t params, char cmd)
     write_uart();
 
     // Read command
-    ReadResponse(COMMAND_PACKET_LENGTH);
+    if (cmd == CMD_GET_TEMPLATE)
+    {
+        ReadResponse(COMMAND_PACKET_LENGTH + TEMPLATE_SIZE_BYTES);
+    }
+    else
+    {
+        ReadResponse(COMMAND_PACKET_LENGTH);
+    }
 }
 
 // Function to handle the reading of a reponse packet
@@ -205,6 +212,10 @@ void ReadData(uint16_t size, char cursor)
     if (bytes_read < size)
     {
         printf("Number of bytes read does not match expectation: expected: %d, read: %d\n", size, bytes_read);
+        for (int i = 0; i < bytes_read; i++) {
+            printf("%02x ", resp_buffer[i]);
+        }
+        printf("\n");
     }
 
     fflush(stdout);
@@ -227,14 +238,14 @@ uint16_t returnResponseCode()
     return ((resp_buffer[9] << 8)) + resp_buffer[8];
 }
 
-
-void get_sha256_of_template(uint8_t *output) {
-    esp_sha_type_t sha_type = ESP_SHA_SHA256;
-    esp_sha_handle_t sha_handle;
-
-    esp_sha_start(sha_type, &sha_handle);
-    esp_sha_update(sha_handle, (const uint8_t *)resp_buffer, TEMPLATE_SIZE_BYTES);
-    esp_sha_finish(sha_handle, output);
+void get_sha256_of_template(uint8_t *output)
+{
+    mbedtls_sha256_context sha256_ctx;
+    mbedtls_sha256_init(&sha256_ctx);
+    mbedtls_sha256_starts(&sha256_ctx, 0);
+    mbedtls_sha256_update(&sha256_ctx, (const unsigned char *)resp_buffer, TEMPLATE_SIZE_BYTES);
+    mbedtls_sha256_finish(&sha256_ctx, output);
+    mbedtls_sha256_free(&sha256_ctx);
 }
 
 // GT511C3 specific functions below
@@ -342,9 +353,9 @@ void GetTemplate(uint8_t id)
     SendCommand((uint32_t)id, CMD_GET_TEMPLATE);
     if (returnResponseCode() == CMD_ACK)
     {
+        ReadData(TEMPLATE_SIZE_BYTES, 0);
         printf("ok\n");
         fflush(stdout);
-        ReadData(TEMPLATE_SIZE_BYTES, 0);
     }
 }
 
@@ -380,14 +391,14 @@ bool CaptureFingerSlow()
     return false;
 }
 
-bool Identification(uint8_t* id)
+bool Identification(uint8_t *id)
 {
     bool id_ok = false;
     SendCommand(0x00, CMD_IDENTIFY);
     if (returnResponseCode() == CMD_ACK)
     {
-        id = (uint8_t)returnParameter();
-        printf("Indentified finger with ID: %ld\n", id);
+        *id = (uint8_t)returnParameter();
+        printf("Indentified finger with ID: %u\n", (unsigned int)*id);
         return true;
     }
     else
@@ -496,4 +507,18 @@ void Enroll(uint8_t num)
         EnrollThird();
         return;
     }
+}
+
+void DeleteAll()
+{
+    SendCommand(0x00, CMD_DELETE_ALL);
+    if (returnResponseCode() == CMD_ACK)
+    {
+        printf("Deleted all enrolled fingerprints\n");
+    }
+    else
+    {
+        printf("Failed to delete all fingerprints\n");
+    }
+    fflush(stdout);
 }
